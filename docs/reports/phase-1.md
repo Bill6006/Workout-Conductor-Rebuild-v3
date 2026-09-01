@@ -2,12 +2,12 @@
 
 **Status: YELLOW — submitted for review.**
 
-|              |                                                          |
-| ------------ | -------------------------------------------------------- |
-| Live app     | https://bill6006.github.io/Workout-Conductor-Rebuild-v3/ |
-| Build marker | _pending deployment_                                     |
-| Commit       | _pending deployment_                                     |
-| Workflow run | _pending deployment_                                     |
+|              |                                                                                                      |
+| ------------ | ---------------------------------------------------------------------------------------------------- |
+| Live app     | https://bill6006.github.io/Workout-Conductor-Rebuild-v3/                                             |
+| Build marker | `phase1-5-afe1f69`                                                                                   |
+| Commit       | [`afe1f69`](https://github.com/Bill6006/Workout-Conductor-Rebuild-v3/commit/afe1f69)                 |
+| Workflow run | [run 33570717563](https://github.com/Bill6006/Workout-Conductor-Rebuild-v3/actions/runs/33570717563) |
 
 ## Scope
 
@@ -115,6 +115,24 @@ shows. See [docs/screenshots/phase-1/](../screenshots/phase-1/).
 
 40 files: all eight setup steps and all five tabs at 360x800 and 412x915 (Android) and at
 1280x900 (desktop), plus a combined contact sheet.
+
+## Verified on the deployed site
+
+Checked against https://bill6006.github.io/Workout-Conductor-Rebuild-v3/ after deployment,
+driven in Chromium on a Pixel-class Android profile (360x800, DPR 3, mobile user agent):
+
+- A first visit lands on setup — "Set up Workout Conductor" — with the bottom navigation
+  correctly absent, so no tab can lead out of the flow.
+- Completing setup lands on Today with all five tabs present.
+- Today, Plan, and Settings all render with zero horizontal overflow.
+- The profile persists to a real `workout-conductor v1` IndexedDB database in production.
+- With the network disabled, a reload still renders — including Settings, which is a lazily
+  loaded chunk, so the service worker precached the code split correctly.
+- No console errors and no page errors across the tour.
+- The build marker reads `phase1-5-afe1f69 · build afe1f69 · 2026-09-01 23:22 UTC`, matching
+  the deployed commit.
+
+Live capture: [live-android-360-today.png](../screenshots/phase-1/live-android-360-today.png)
 
 ## Known limitations
 
