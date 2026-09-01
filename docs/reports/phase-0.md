@@ -2,13 +2,13 @@
 
 **Status: YELLOW — submitted for review.**
 
-|              |                                                          |
-| ------------ | -------------------------------------------------------- |
-| Live app     | https://bill6006.github.io/Workout-Conductor-Rebuild-v3/ |
-| Build marker | _pending first deployment_                               |
-| Commit       | _pending first deployment_                               |
-| Build time   | _pending first deployment_                               |
-| Workflow run | _pending first deployment_                               |
+|              |                                                                                                      |
+| ------------ | ---------------------------------------------------------------------------------------------------- |
+| Live app     | https://bill6006.github.io/Workout-Conductor-Rebuild-v3/                                             |
+| Build marker | `phase0-2-7cfe315`                                                                                   |
+| Commit       | [`7cfe315`](https://github.com/Bill6006/Workout-Conductor-Rebuild-v3/commit/7cfe315)                 |
+| Build time   | 2026-09-01 18:21 UTC                                                                                 |
+| Workflow run | [run 33543143735](https://github.com/Bill6006/Workout-Conductor-Rebuild-v3/actions/runs/33543143735) |
 
 ## Scope
 
@@ -103,6 +103,32 @@ combined contact sheet.
 | Settings | [android-360-settings.png](../screenshots/phase-0/android-360-settings.png) | [android-412-settings.png](../screenshots/phase-0/android-412-settings.png) |
 
 Contact sheet: [preview-sheet.png](../screenshots/phase-0/preview-sheet.png)
+
+## Verified on the deployed site
+
+Checked against https://bill6006.github.io/Workout-Conductor-Rebuild-v3/ after deployment,
+driven in Chromium on a Pixel-class Android profile (360x800, DPR 3, mobile user agent):
+
+- All five tabs render the correct `<h1>` with zero horizontal overflow.
+- No console errors and no page errors across a full tour.
+- The service worker registers at the repository scope and reaches `activated`; the
+  second visit is controlled by it.
+- With the network disabled, a reload still renders the shell, the five-tab navigation,
+  and the build marker — the offline app shell works.
+- The on-screen build marker reads `phase0-2-7cfe315 · build 7cfe315 · 2026-09-01 18:21 UTC`,
+  matching the deployed commit.
+
+Live capture: [live-android-360-today.png](../screenshots/phase-0/live-android-360-today.png)
+
+## A note on the first deployment attempt
+
+The first push did **not** deploy, and that was the pipeline working correctly. The browser
+smoke test failed on the Linux runner: at 240 CSS px — a 360px phone at 150% page zoom —
+the bottom-navigation labels truncated. It passed locally only because Windows renders the
+font stack as Segoe UI, which is narrower than the runner's DejaVu Sans fallback. The gate
+refused to upload an artifact, so nothing was published and no broken build ever reached
+the live URL. The fix (`7cfe315`) scales the label with the viewport and was verified
+against Verdana as a deliberate worst case, wider than Roboto, DejaVu Sans, or Segoe UI.
 
 ## Known limitations
 

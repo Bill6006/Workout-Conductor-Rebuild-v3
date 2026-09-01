@@ -72,9 +72,10 @@ foundation and deliberately implements no training features.
   in the product.
 - No onboarding, profile, IndexedDB layer, exercise catalog, generation engine,
   recalibration, set logger, or analytics exist yet.
-- The service worker is configured for prompt-to-update, but the "New version available"
-  prompt cannot be exercised until a second deployment exists to update to. First real
-  test is the Phase 1 deploy.
+- The service worker is configured for prompt-to-update. Registration, activation, and
+  offline shell reload are all verified on the live site, but the "New version available"
+  prompt itself cannot be exercised until there is a newer deployment to update to. First
+  real test is the Phase 1 deploy.
 - The mobile report's feature rows are unfilled on purpose — there is no feature to check.
 
 ## Next concrete action
