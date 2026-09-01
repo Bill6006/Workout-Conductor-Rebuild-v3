@@ -14,16 +14,16 @@
 
 ## Where the build is
 
-|                            |                                                    |
-| -------------------------- | -------------------------------------------------- |
-| **Current phase**          | Phase 0 — Repository, Live Pages, and Scaffold     |
-| **Phase state**            | YELLOW — awaiting owner review on Android          |
-| **Latest completed phase** | None. Phase 0 is the first.                        |
-| **Branch**                 | `main`                                             |
-| **Latest commit**          | See the commits link above                         |
-| **Latest deployment**      | First Pages deployment in progress                 |
-| **Deployed build marker**  | Set by the Pages workflow; visible on every screen |
-| **Last updated**           | 2026-09-01                                         |
+|                            |                                                                                                                                    |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| **Current phase**          | Phase 0 — Repository, Live Pages, and Scaffold                                                                                     |
+| **Phase state**            | YELLOW — deployed and verified; awaiting your Android review                                                                       |
+| **Latest completed phase** | None. Phase 0 is the first.                                                                                                        |
+| **Branch**                 | `main`                                                                                                                             |
+| **Latest commit**          | [commit history](https://github.com/Bill6006/Workout-Conductor-Rebuild-v3/commits/main) — the phase report pins the reviewed build |
+| **Latest deployment**      | live — [Pages runs](https://github.com/Bill6006/Workout-Conductor-Rebuild-v3/actions/workflows/pages.yml)                          |
+| **Deployed build marker**  | `phase0-<run>-<short sha>`, at the foot of every screen. Read it in the live app; it always names the commit currently deployed.   |
+| **Last updated**           | 2026-09-01                                                                                                                         |
 
 ## Work in progress
 
