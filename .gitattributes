@@ -1,0 +1,14 @@
+# Normalise to LF in the repository. The build, the Linux CI checkout, and
+# Prettier (endOfLine: lf) all agree on LF; Windows working copies may still
+# check out CRLF locally without changing what is stored.
+* text=auto eol=lf
+
+# Binary assets must never be line-ending converted.
+*.png binary
+*.jpg binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.mp4 binary
+*.webm binary
