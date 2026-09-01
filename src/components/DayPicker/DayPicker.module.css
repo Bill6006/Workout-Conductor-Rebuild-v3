@@ -1,0 +1,46 @@
+.week {
+  display: flex;
+  gap: 3px;
+  width: 100%;
+  min-width: 0;
+}
+
+.day {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 52px;
+  padding: var(--wc-s-2) 0;
+  border: 1px solid var(--wc-line-strong);
+  border-radius: var(--wc-r-md);
+  background: var(--wc-surface-2);
+  color: var(--wc-text-soft);
+  /*
+   * Measured, not guessed. At 240 CSS px a cell is 21.7px wide, which holds a
+   * two-letter label at 10px in Verdana (the widest face the app can land on)
+   * with room to spare. The vw term brings it back up to 15px on a real phone.
+   */
+  font: 600 clamp(10px, 4vw, 15px) / 1.1 var(--wc-font);
+  text-align: center;
+  overflow-wrap: anywhere;
+  transition:
+    background-color var(--wc-dur-fast) var(--wc-ease),
+    border-color var(--wc-dur-fast) var(--wc-ease),
+    color var(--wc-dur-fast) var(--wc-ease);
+}
+
+.day:not(:disabled):hover {
+  background: var(--wc-surface-3);
+}
+
+.on {
+  border-color: var(--wc-lime-edge);
+  background: var(--wc-lime-wash);
+  color: var(--wc-lime);
+}
+
+.day:disabled {
+  cursor: not-allowed;
+  border-color: var(--wc-line);
+  background: var(--wc-bg-elevated);
+  color: var(--wc-text-faint);
+}

@@ -1,0 +1,208 @@
+/*
+ * Shared by the eight step bodies. They are one screen wearing eight faces —
+ * the same stack of fields with the same rhythm — so a single module keeps them
+ * from drifting apart. The flow chrome (progress, dock, live region) lives in
+ * OnboardingFlow.module.css.
+ */
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-5);
+  min-width: 0;
+}
+
+.copy {
+  font: var(--wc-t-body);
+  color: var(--wc-text-soft);
+  overflow-wrap: break-word;
+}
+
+.note {
+  font: var(--wc-t-small);
+  color: var(--wc-text-muted);
+  overflow-wrap: break-word;
+}
+
+.points {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-3);
+  min-width: 0;
+}
+
+.point {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--wc-s-3);
+  min-width: 0;
+}
+
+.tick {
+  flex: none;
+  inline-size: 22px;
+  block-size: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--wc-r-pill);
+  background: var(--wc-lime-wash);
+  color: var(--wc-lime);
+  font: var(--wc-t-label);
+}
+
+.pointText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.pointTitle {
+  font: var(--wc-t-body);
+  color: var(--wc-text);
+  overflow-wrap: break-word;
+}
+
+.pointBody {
+  font: var(--wc-t-small);
+  color: var(--wc-text-muted);
+  overflow-wrap: break-word;
+}
+
+.toggles {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-2);
+  min-width: 0;
+}
+
+.text,
+.notes {
+  inline-size: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: var(--wc-s-3) var(--wc-s-4);
+  border: 1px solid var(--wc-line-strong);
+  border-radius: var(--wc-r-md);
+  background: var(--wc-surface-2);
+  color: var(--wc-text);
+  font: var(--wc-t-body);
+}
+
+.notes {
+  min-height: 96px;
+  resize: vertical;
+}
+
+.text::placeholder,
+.notes::placeholder {
+  color: var(--wc-text-faint);
+}
+
+/* ------------------------------------------------------------- locations */
+
+.places {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-4);
+  min-width: 0;
+}
+
+.place {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-4);
+  min-width: 0;
+  padding: var(--wc-s-4);
+  border: 1px solid var(--wc-line);
+  border-radius: var(--wc-r-lg);
+  background: var(--wc-bg-elevated);
+}
+
+.placeHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--wc-s-2);
+  min-width: 0;
+}
+
+.placeTitle {
+  font: var(--wc-t-heading);
+  color: var(--wc-text);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.placeActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--wc-s-2);
+  min-width: 0;
+}
+
+.small,
+.danger {
+  min-height: 44px;
+  padding: var(--wc-s-2) var(--wc-s-4);
+  border: 1px solid var(--wc-line-strong);
+  border-radius: var(--wc-r-pill);
+  background: var(--wc-surface-2);
+  color: var(--wc-text);
+  font: var(--wc-t-small);
+  overflow-wrap: anywhere;
+}
+
+.danger {
+  color: var(--wc-danger);
+}
+
+.small:not(:disabled):hover,
+.danger:not(:disabled):hover {
+  background: var(--wc-surface-3);
+}
+
+.small:disabled,
+.danger:disabled {
+  cursor: not-allowed;
+  color: var(--wc-text-faint);
+  background: var(--wc-surface);
+}
+
+/* ---------------------------------------------------------------- review */
+
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-2);
+  min-width: 0;
+  margin: 0;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--wc-s-2);
+  min-width: 0;
+}
+
+.term {
+  flex: none;
+  font: var(--wc-t-small);
+  color: var(--wc-text-muted);
+}
+
+.value,
+.faint {
+  margin: 0;
+  min-width: 0;
+  font: var(--wc-t-body);
+  color: var(--wc-text);
+  overflow-wrap: anywhere;
+}
+
+.faint {
+  color: var(--wc-text-faint);
+}

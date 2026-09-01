@@ -65,7 +65,7 @@ jobs:
         run: npm run build
         env:
           VITE_BUILD_MARKER: ci-${{ github.run_number }}-${{ env.SHORT_SHA }}
-          VITE_BUILD_PHASE: 'Phase 0 - Repository, Live Pages, and Scaffold'
+          VITE_BUILD_PHASE: 'Phase 1 - Product Foundation and First Useful Live Preview'
           VITE_BUILD_COMMIT: ${{ env.SHORT_SHA }}
           VITE_BUILD_TIME: ${{ env.BUILD_TIME }}
 

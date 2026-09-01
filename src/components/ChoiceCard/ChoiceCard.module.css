@@ -1,0 +1,115 @@
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-2);
+  min-width: 0;
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  gap: var(--wc-s-3);
+  width: 100%;
+  min-height: 56px;
+  /* Inline padding, icon, and mark all give room back to the text at 240px. */
+  padding: var(--wc-s-3) clamp(10px, 4vw, 16px);
+  border: 1px solid var(--wc-line);
+  border-radius: var(--wc-r-lg);
+  background: var(--wc-surface);
+  color: var(--wc-text);
+  text-align: left;
+  transition:
+    background-color var(--wc-dur-fast) var(--wc-ease),
+    border-color var(--wc-dur-fast) var(--wc-ease),
+    transform var(--wc-dur-fast) var(--wc-ease);
+}
+
+.card:not(:disabled):active {
+  transform: scale(0.99);
+}
+
+.card:not(:disabled):hover {
+  background: var(--wc-surface-2);
+}
+
+.selected {
+  border-color: var(--wc-lime-edge);
+  background: linear-gradient(180deg, var(--wc-lime-wash), transparent 70%), var(--wc-surface-2);
+}
+
+.selected:not(:disabled):hover {
+  background: linear-gradient(180deg, var(--wc-lime-wash), transparent 70%), var(--wc-surface-3);
+}
+
+.card:disabled {
+  cursor: not-allowed;
+  border-color: var(--wc-line);
+  background: var(--wc-bg-elevated);
+  color: var(--wc-text-faint);
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: clamp(28px, 9vw, 34px);
+  height: clamp(28px, 9vw, 34px);
+  border-radius: var(--wc-r-sm);
+  background: var(--wc-surface-3);
+  color: var(--wc-text-soft);
+  font: var(--wc-t-heading);
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.title {
+  font: var(--wc-t-heading);
+  /* Holds an eight-letter word on one line at 240 CSS px in Verdana. */
+  font-size: clamp(14px, 4.6vw, 17px);
+  overflow-wrap: break-word;
+}
+
+.description {
+  font: var(--wc-t-small);
+  font-size: clamp(11px, 3.8vw, 13px);
+  color: var(--wc-text-muted);
+  overflow-wrap: break-word;
+}
+
+/* A confirmation mark, not the hit target — the whole card is the target. */
+.markRound,
+.markSquare {
+  flex: none;
+  width: clamp(18px, 6vw, 22px);
+  height: clamp(18px, 6vw, 22px);
+  border: 2px solid var(--wc-line-strong);
+  background: transparent;
+  transition: background-color var(--wc-dur-fast) var(--wc-ease);
+}
+
+.markRound {
+  border-radius: var(--wc-r-pill);
+}
+
+.markSquare {
+  border-radius: 7px;
+}
+
+.selected .markRound,
+.selected .markSquare {
+  border-color: var(--wc-lime);
+  background:
+    radial-gradient(circle at 50% 50%, var(--wc-lime) 0 46%, transparent 47%) no-repeat,
+    transparent;
+}
+
+.selected .markSquare {
+  background: var(--wc-lime);
+}

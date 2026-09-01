@@ -7,8 +7,8 @@ courtesy check.
 Copy this file's tables into the phase report, or update this file in place and link it. Record
 what was actually observed. "Assumed fine" is not a result.
 
-**Current status: Phase 0 — shell only.** Only the app shell, navigation, and placeholder screens
-exist, so every feature row below is marked `shell only`. They become real rows in the phase that
+**Current status: Phase 1 — setup, profile, settings, and Today are real.** The feature rows
+below that belong to later phases stay marked `n/a`; they become real rows in the phase that
 builds the feature.
 
 ## How to run it
@@ -27,13 +27,19 @@ scaling grows text inside a fixed layout, which is the harsher test.
 
 Result key: `pass` / `fail` / `n/a`.
 
-**Phase 0 run — 2026-09-01, all 16 combinations pass.** Measured against the production
+**Phase 1 run — 2026-09-01, all 16 combinations pass.** Measured against the production
 build served on the deployed sub-path, driven with Chromium at `deviceScaleFactor: 3`,
 `isMobile: true`. Page zoom is emulated the way the browser implements it: the CSS viewport
-shrinks by the zoom factor, so 360 px at 150% lays out in 240 CSS px. Every one of the five
-routes was checked at every combination for four conditions — `documentElement.scrollWidth`
-never exceeding `window.innerWidth`, the bottom navigation still rendered with all five
-items, every navigation item at least 44 px tall, and exactly one `<h1>` per route.
+shrinks by the zoom factor, so 360 px at 150% lays out in 240 CSS px. Each combination walks
+**every one of the eight setup steps and then all five tabs** — 13 screens per combination,
+208 screen states in total — asserting on each that `documentElement.scrollWidth` never
+exceeds `window.innerWidth`, that there is exactly one `<h1>`, and that no button or link is
+missing an accessible name.
+
+The header tagline and the setup dock get their own dedicated sweep in
+`tests/e2e/header-tagline.spec.ts`, which checks them at 360 / 375 / 412 / 430 and 240 CSS px
+against Roboto, DejaVu Sans, Segoe UI, and Verdana — the app ships no web font, so the face
+is whatever the device supplies, and a fit verified in only one of them is not verified.
 
 ### 360 px wide
 
@@ -89,32 +95,32 @@ The page itself must never scroll sideways; wide content scrolls inside its own 
 
 ## Android keyboard behaviour
 
-| Check                                                      | Phase 0    | Result | Notes                |
-| ---------------------------------------------------------- | ---------- | ------ | -------------------- |
-| Focused input stays visible when the keyboard opens        | shell only |        |                      |
-| Layout does not jump or reflow permanently after dismissal | shell only |        |                      |
-| Bottom navigation does not float above the keyboard        | shell only |        |                      |
-| Numeric fields open the numeric keypad                     | shell only |        | Weight and rep entry |
-| Enter / next moves between set fields sensibly             | shell only |        |                      |
+| Check                                                      | Phase 1    | Result | Notes                                                             |
+| ---------------------------------------------------------- | ---------- | ------ | ----------------------------------------------------------------- |
+| Focused input stays visible when the keyboard opens        | shell only |        |                                                                   |
+| Layout does not jump or reflow permanently after dismissal | shell only |        |                                                                   |
+| Bottom navigation does not float above the keyboard        | shell only |        |                                                                   |
+| Numeric fields open the numeric keypad                     | covered    | pass   | inputMode="numeric" on the length and sessions fields; 54 px tall |
+| Enter / next moves between set fields sensibly             | shell only |        |                                                                   |
 
 ## Feature checks
 
 These become real rows in the phase that builds them.
 
-| Check                                                | Phase 0    | Result | Notes                                      |
-| ---------------------------------------------------- | ---------- | ------ | ------------------------------------------ |
-| Dialogs and sheets fit at 150% zoom without clipping | shell only |        | Phase 1+                                   |
-| Dialogs are dismissible and trap focus               | shell only |        | Phase 1+                                   |
-| Set logging is comfortable one-handed                | shell only |        | Phase 5                                    |
-| Set logging survives rotation without data loss      | shell only |        | Phase 5                                    |
-| Duration dropdown is reachable and readable          | shell only |        | Phase 3 — the one 15/30/45/Default control |
-| Duration change rebuilds rather than truncates       | shell only |        | Phase 3                                    |
-| Alternatives sheet is scrollable and legible         | shell only |        | Phase 2 / 5                                |
-| Calibration loading state appears and resolves       | shell only |        | Phase 4 — states what it is recalculating  |
-| Calibration overlay does not block logged work       | shell only |        | Phase 4                                    |
-| Active workout resumes correctly after backgrounding | shell only |        | Phase 5                                    |
-| Active workout resumes after a full app restart      | shell only |        | Phase 5                                    |
-| Update prompt is suppressed during an active workout | shell only |        | Phase 8                                    |
+| Check                                                | Phase 1    | Result | Notes                                                                   |
+| ---------------------------------------------------- | ---------- | ------ | ----------------------------------------------------------------------- |
+| Dialogs and sheets fit at 150% zoom without clipping | covered    | pass   | Measured at 240 CSS px: sheet unclipped, zero document overflow         |
+| Dialogs are dismissible and trap focus               | covered    | pass   | Focus inside, aria-modal, Escape closes and returns focus to the opener |
+| Set logging is comfortable one-handed                | shell only |        | Phase 5                                                                 |
+| Set logging survives rotation without data loss      | shell only |        | Phase 5                                                                 |
+| Duration dropdown is reachable and readable          | shell only |        | Phase 3 — the one 15/30/45/Default control                              |
+| Duration change rebuilds rather than truncates       | shell only |        | Phase 3                                                                 |
+| Alternatives sheet is scrollable and legible         | shell only |        | Phase 2 / 5                                                             |
+| Calibration loading state appears and resolves       | shell only |        | Phase 4 — states what it is recalculating                               |
+| Calibration overlay does not block logged work       | shell only |        | Phase 4                                                                 |
+| Active workout resumes correctly after backgrounding | shell only |        | Phase 5                                                                 |
+| Active workout resumes after a full app restart      | shell only |        | Phase 5                                                                 |
+| Update prompt is suppressed during an active workout | shell only |        | Phase 8                                                                 |
 
 ## Devices and browsers exercised
 

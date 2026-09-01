@@ -36,11 +36,18 @@ const ANDROID_USER_AGENT =
 const CHROMIUM = devices['Desktop Chrome']
 
 /**
- * Layout geometry is driven by viewport width, and mobile-layout.spec.ts sweeps
- * the widths itself. Running it under all three projects would repeat identical
- * work three times, so the two secondary projects skip that file.
+ * Files that answer a question no viewport can change, so the two secondary
+ * projects skip them:
+ *
+ *  - mobile-layout.spec.ts sweeps the widths itself, and running it under all
+ *    three projects would repeat identical work three times.
+ *  - service-worker.spec.ts is the only file allowed to register a worker, and
+ *    every registration means an install plus a fourteen-entry precache burst
+ *    against a single-threaded static server. Three copies of that burst
+ *    stalled unrelated navigations in other workers; one is plenty to prove
+ *    offline support still ships.
  */
-const LAYOUT_SPEC = /mobile-layout\.spec\.ts/
+const SINGLE_PROJECT_SPECS = /(mobile-layout|service-worker)\.spec\.ts/
 
 export default defineConfig({
   testDir: './tests/e2e',
@@ -62,6 +69,20 @@ export default defineConfig({
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     colorScheme: 'dark',
+    /*
+     * Every test gets a fresh context, and a fresh context installs the service
+     * worker from scratch: register, install, precache fourteen entries, then
+     * answer the next navigation out of a cache that may not be populated yet.
+     * `navigateFallback` puts that half-warm worker in front of `page.reload()`,
+     * which is how the suite proves persistence — and a navigation that races an
+     * activating worker comes back as net::ERR_ABORTED.
+     *
+     * Blocking it here means these tests measure the app rather than cache
+     * timing. Offline support is a real promise, so it is still asserted — by
+     * service-worker.spec.ts, which re-enables workers for itself and is the
+     * only file that does.
+     */
+    serviceWorkers: 'block',
   },
 
   projects: [
@@ -78,7 +99,7 @@ export default defineConfig({
     },
     {
       name: 'android-412',
-      testIgnore: LAYOUT_SPEC,
+      testIgnore: SINGLE_PROJECT_SPECS,
       use: {
         ...CHROMIUM,
         userAgent: ANDROID_USER_AGENT,
@@ -90,7 +111,7 @@ export default defineConfig({
     },
     {
       name: 'desktop-chromium',
-      testIgnore: LAYOUT_SPEC,
+      testIgnore: SINGLE_PROJECT_SPECS,
       use: {
         ...CHROMIUM,
         viewport: { width: 1280, height: 900 },

@@ -1,0 +1,58 @@
+.group {
+  display: flex;
+  gap: 3px;
+  width: 100%;
+  min-width: 0;
+  padding: 3px;
+  border: 1px solid var(--wc-line);
+  border-radius: var(--wc-r-pill);
+  background: var(--wc-bg-elevated);
+}
+
+.segment {
+  /*
+   * Equal shares with `min-width: 0` and a mid-word break: four segments at
+   * 240 CSS px wrap instead of pushing the row wider than its container.
+   */
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 44px;
+  padding: var(--wc-s-2) 4px;
+  border: 1px solid transparent;
+  border-radius: var(--wc-r-pill);
+  background: transparent;
+  color: var(--wc-text-muted);
+  font: 600 clamp(11px, 3.9vw, 15px) / 1.2 var(--wc-font);
+  text-align: center;
+  /*
+   * At 240 CSS px four segments are 38px wide, which no six-letter word fits
+   * on one line, so a long label takes a second line. Hyphenation is asked for
+   * first (browsers without a dictionary just skip it) and `anywhere` is the
+   * fallback. The point of both is that nothing is ever clipped or ellipsised.
+   */
+  hyphens: auto;
+  overflow-wrap: anywhere;
+  transition:
+    background-color var(--wc-dur-fast) var(--wc-ease),
+    color var(--wc-dur-fast) var(--wc-ease);
+}
+
+.segment:not(:disabled):hover {
+  color: var(--wc-text-soft);
+}
+
+.on {
+  border-color: var(--wc-lime-edge);
+  background: var(--wc-lime-wash);
+  color: var(--wc-lime);
+}
+
+.segment:disabled {
+  cursor: not-allowed;
+  color: var(--wc-text-faint);
+}
+
+.on:disabled {
+  border-color: var(--wc-line);
+  background: var(--wc-surface-2);
+}

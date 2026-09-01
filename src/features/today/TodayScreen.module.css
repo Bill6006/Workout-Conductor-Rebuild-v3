@@ -15,7 +15,52 @@
 .copy {
   font: var(--wc-t-small);
   color: var(--wc-text-soft);
+  overflow-wrap: break-word;
 }
+
+/* --------------------------------------------------- session facts */
+
+.facts {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+  margin: 0;
+}
+
+.fact {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--wc-s-1) var(--wc-s-3);
+  min-width: 0;
+  padding: var(--wc-s-2) 0;
+  border-top: 1px solid var(--wc-line);
+}
+
+.fact:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.factLabel {
+  font: var(--wc-t-small);
+  color: var(--wc-text-muted);
+  overflow-wrap: break-word;
+}
+
+/* `dd` carries a 40px UA indent that would push a long value off a 240px screen. */
+.factValue {
+  margin: 0;
+  min-width: 0;
+  font: var(--wc-t-small);
+  color: var(--wc-text);
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+/* ------------------------------------------- the one length control */
 
 .lengthRow {
   display: flex;
@@ -32,34 +77,58 @@
   color: var(--wc-text);
 }
 
-/* Static placeholder for the Phase 3 duration dropdown. */
+/*
+ * Static placeholder for the Phase 3 duration dropdown. It now carries the
+ * profile's default duration, so the label is longer than the Phase 0 one —
+ * the padding and type shrink with the viewport so `Default · 180 min` still
+ * fits inside a 240 CSS px screen, in the widest face the app can land on.
+ */
 .lengthControl {
   display: inline-flex;
   align-items: center;
   gap: var(--wc-s-2);
   min-height: 44px;
   min-width: 0;
-  padding: var(--wc-s-2) var(--wc-s-4);
+  max-width: 100%;
+  padding: var(--wc-s-2) clamp(var(--wc-s-2), 3.5vw, var(--wc-s-4));
   border: 1px solid var(--wc-line);
   border-radius: var(--wc-r-pill);
   background: var(--wc-surface-2);
   color: var(--wc-text-faint);
   font: var(--wc-t-body);
+  font-size: clamp(13px, 4vw, 15px);
+  white-space: nowrap;
   cursor: not-allowed;
 }
 
 .caption {
   font: var(--wc-t-small);
   color: var(--wc-text-muted);
+  overflow-wrap: break-word;
 }
 
+/* ------------------------------------------------------ stat tiles */
+
+/*
+ * Two columns on a 240 CSS px screen, three from roughly 320px up. A fixed
+ * three-column grid left each tile too narrow to hold a real value.
+ */
 .stats {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
   gap: var(--wc-s-2);
   min-width: 0;
 }
 
 .stats > li {
   min-width: 0;
+}
+
+/*
+ * Overflow guard, not a restyle. A tile value is normally a short number, but
+ * the location tile shows a name the user typed (up to 60 characters), and an
+ * unbroken one would push the grid past the viewport.
+ */
+.stats li p {
+  overflow-wrap: anywhere;
 }

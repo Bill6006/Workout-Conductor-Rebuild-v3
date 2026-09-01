@@ -1,11 +1,17 @@
 import { expect, test, type Page } from '@playwright/test'
-import { ROUTES } from './routes'
+import { startFresh, startWithProfile } from './appState'
+import { ROUTES, SETUP_STEPS } from './routes'
+import { walkSetup } from './setupFlow'
 
 /**
  * Hand-rolled structural accessibility checks — no axe, no new dependency.
  * These cover the failures that a five-tab shell can actually commit: a
  * missing or duplicated h1, an unnamed landmark, a control nobody can hear,
  * or decorative artwork left in the accessibility tree.
+ *
+ * Phase 1 added a setup flow that swaps the whole main region eight times
+ * without a navigation, which is exactly where a second `h1` or an unnamed
+ * control tends to appear, so it gets the same sweep — step by step.
  */
 
 interface Structure {
@@ -91,29 +97,82 @@ async function readStructure(page: Page): Promise<Structure> {
   })
 }
 
-for (const route of ROUTES) {
-  test(`${route.tab} is structurally accessible`, async ({ page }) => {
-    await page.goto(`./${route.hash}`)
-    await expect(page.getByRole('heading', { level: 1, name: route.heading })).toBeVisible()
+/**
+ * The assertions every screen in the app has to satisfy, whatever it renders.
+ *
+ * `nav` is the one thing a screen is allowed to differ on. Ordinary screens
+ * must carry the primary navigation; the setup flow must NOT, because while
+ * setup is being forced every tab bounces straight back to it, and five
+ * focusable controls that do nothing are worse than none. Either way, any nav
+ * landmark that IS present still has to be named.
+ */
+function expectSound(
+  structure: Structure,
+  heading: string,
+  context: string,
+  options: { nav?: 'required' | 'none' } = {},
+) {
+  expect(structure.h1, `${context}: exactly one h1 per screen`).toEqual([heading])
+  expect(structure.mains, `${context}: exactly one main landmark`).toBe(1)
 
-    const structure = await readStructure(page)
+  if (options.nav === 'none') {
+    expect(structure.navs.length, `${context}: setup must not paint a nav the gate will bounce`).toBe(0)
+  } else {
+    expect(structure.navs.length, `${context}: no nav landmark`).toBeGreaterThan(0)
+  }
+  for (const nav of structure.navs) {
+    expect(nav.name, `${context}: every nav landmark needs an accessible name`).not.toBe('')
+  }
 
-    expect(structure.h1, 'exactly one h1 per screen').toEqual([route.heading])
-    expect(structure.mains, 'exactly one main landmark').toBe(1)
+  expect(
+    structure.unnamedControls,
+    `${context}: controls with no accessible name: ${structure.unnamedControls.join(', ')}`,
+  ).toEqual([])
 
-    expect(structure.navs.length).toBeGreaterThan(0)
-    for (const nav of structure.navs) {
-      expect(nav.name, 'every nav landmark needs an accessible name').not.toBe('')
-    }
-
-    expect(
-      structure.unnamedControls,
-      `controls with no accessible name: ${structure.unnamedControls.join(', ')}`,
-    ).toEqual([])
-
-    expect(
-      structure.unlabelledGraphics,
-      `graphics that are neither labelled nor hidden: ${structure.unlabelledGraphics.join(', ')}`,
-    ).toEqual([])
-  })
+  expect(
+    structure.unlabelledGraphics,
+    `${context}: graphics that are neither labelled nor hidden: ${structure.unlabelledGraphics.join(', ')}`,
+  ).toEqual([])
 }
+
+test.describe('the app, on a device that has finished setup', () => {
+  test.beforeEach(async ({ page }) => {
+    await startWithProfile(page)
+  })
+
+  for (const route of ROUTES) {
+    test(`${route.tab} is structurally accessible`, async ({ page }) => {
+      await page.goto(`./${route.hash}`)
+      await expect(page.getByRole('heading', { level: 1, name: route.heading })).toBeVisible()
+
+      expectSound(await readStructure(page), route.heading, route.tab)
+    })
+  }
+
+  test('an open settings sheet is still structurally sound', async ({ page }) => {
+    await page.goto('./#/settings')
+    await page.getByRole('button', { name: 'Injuries and movements to avoid' }).click()
+    await expect(page.getByRole('dialog', { name: 'Limitations' })).toBeVisible()
+
+    // A modal is where an unnamed close button or a second h1 usually appears.
+    expectSound(await readStructure(page), 'Settings', 'Settings · Limitations sheet')
+  })
+})
+
+test.describe('setup, on a first visit', () => {
+  test.beforeEach(async ({ page }) => {
+    await startFresh(page)
+  })
+
+  test('every setup step is structurally accessible', async ({ page }) => {
+    await page.goto('./')
+
+    await walkSetup(page, async (index) => {
+      expectSound(await readStructure(page), SETUP_STEPS[index].heading, `setup step ${index + 1}`, {
+        nav: 'none',
+      })
+    })
+
+    await expect(page.getByRole('heading', { level: 1, name: 'Today', exact: true })).toBeVisible()
+  })
+})

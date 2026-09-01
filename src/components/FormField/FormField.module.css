@@ -1,0 +1,32 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-2);
+  min-width: 0;
+}
+
+.label {
+  font: var(--wc-t-heading);
+  color: var(--wc-text);
+  overflow-wrap: anywhere;
+}
+
+.hint {
+  margin-top: -4px;
+  font: var(--wc-t-small);
+  color: var(--wc-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.control {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-2);
+  min-width: 0;
+}
+
+.error {
+  font: var(--wc-t-small);
+  color: var(--wc-danger);
+  overflow-wrap: anywhere;
+}

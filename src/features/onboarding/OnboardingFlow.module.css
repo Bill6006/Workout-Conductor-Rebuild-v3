@@ -1,0 +1,169 @@
+.flow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-5);
+  min-width: 0;
+}
+
+.top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--wc-s-3);
+  min-width: 0;
+}
+
+.progress {
+  flex: 1 1 180px;
+  min-width: 0;
+}
+
+.exit {
+  flex: none;
+  min-height: 44px;
+  padding: var(--wc-s-2) var(--wc-s-3);
+  border-radius: var(--wc-r-pill);
+  color: var(--wc-text-muted);
+  font: var(--wc-t-small);
+}
+
+.exit:hover {
+  color: var(--wc-text);
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-2);
+  min-width: 0;
+}
+
+/*
+ * Focus lands here on every step change, so a screen-reader user hears where
+ * they have arrived instead of being dropped at the top of a new form. The
+ * ring is suppressed because the move is programmatic, never a tab stop.
+ */
+.title {
+  font: var(--wc-t-display);
+  color: var(--wc-text);
+  letter-spacing: -0.02em;
+  overflow-wrap: break-word;
+}
+
+.title:focus {
+  outline: none;
+}
+
+.subtitle {
+  font: var(--wc-t-small);
+  color: var(--wc-text-muted);
+  overflow-wrap: break-word;
+}
+
+.body {
+  min-width: 0;
+}
+
+/* The live region is always in the DOM so assistive tech is watching it. */
+.alerts {
+  min-width: 0;
+}
+
+.alertList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-1);
+  min-width: 0;
+  padding: var(--wc-s-3) var(--wc-s-4);
+  border: 1px solid var(--wc-line-strong);
+  border-radius: var(--wc-r-md);
+  background: var(--wc-surface-2);
+}
+
+.alert {
+  font: var(--wc-t-small);
+  color: var(--wc-warn);
+  overflow-wrap: break-word;
+}
+
+.failure {
+  font: var(--wc-t-small);
+  color: var(--wc-danger);
+  overflow-wrap: break-word;
+}
+
+.note {
+  font: var(--wc-t-small);
+  color: var(--wc-text-muted);
+  overflow-wrap: break-word;
+}
+
+/*
+ * The dock keeps the primary action inside thumb reach on a long step. It is
+ * sticky rather than fixed so it never covers the last field.
+ *
+ * The default offset clears the app's fixed bottom nav, which is what the shell
+ * renders behind this screen. A host that hides the nav sets
+ * `--wc-onboarding-dock-offset: var(--wc-safe-bottom)` on any ancestor.
+ */
+.dock {
+  position: sticky;
+  bottom: var(--wc-onboarding-dock-offset, calc(var(--wc-nav-h) + var(--wc-safe-bottom)));
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-2);
+  min-width: 0;
+  margin-inline: calc(var(--wc-gutter) * -1);
+  padding: var(--wc-s-3) var(--wc-gutter);
+  border-top: 1px solid var(--wc-line);
+  background: var(--wc-scrim);
+  backdrop-filter: blur(16px) saturate(1.1);
+  -webkit-backdrop-filter: blur(16px) saturate(1.1);
+}
+
+.actions {
+  display: flex;
+  align-items: stretch;
+  gap: var(--wc-s-2);
+  min-width: 0;
+}
+
+/*
+ * Two actions have to share 170px of content box at 240 CSS px. They shrink
+ * their padding first and wrap their label second; neither may push the page
+ * sideways, so both carry `min-width: 0`.
+ */
+.back,
+.forward {
+  min-width: 0;
+  padding-inline: clamp(var(--wc-s-2), 3.5vw, var(--wc-s-5));
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+/*
+ * A percentage basis was the bug: 36% of the dock is narrower than "Skip
+ * setup" on every phone width, so the widest secondary label was hyphenated
+ * onto three lines on the one step where it matters. `width: max-content`
+ * makes the label's own single-line width the basis instead — PrimaryAction
+ * is `width: 100%`, so `flex-basis: auto` alone would have resolved to the
+ * whole row. It still gives ground before the primary action does, and it
+ * never takes more than half the row.
+ */
+.back {
+  flex: 0 1 auto;
+  width: max-content;
+  max-width: 50%;
+}
+
+/*
+ * A zero basis, not `auto`: PrimaryAction is `width: 100%`, so `flex-basis:
+ * auto` made this action's hypothetical size the entire row and every pixel
+ * the secondary action needed came out of it by shrinking. From zero it simply
+ * grows into whatever is left once the label beside it has been laid out.
+ */
+.forward {
+  flex: 1 1 0;
+}

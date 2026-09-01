@@ -29,7 +29,7 @@ import { chromium } from '@playwright/test'
 const ROOT = fileURLToPath(new URL('..', import.meta.url))
 
 const DEFAULT_BASE_URL = 'http://localhost:4173/Workout-Conductor-Rebuild-v3/'
-const DEFAULT_OUT = 'docs/screenshots/phase-0'
+const DEFAULT_OUT = 'docs/screenshots/phase-1'
 
 const BUILD_MARKER = '[data-testid="build-marker"]'
 const SETTLE_MS = 400
@@ -115,6 +115,48 @@ async function openTab(page, baseUrl, hash, problems) {
   await page.waitForTimeout(SETTLE_MS)
 }
 
+/**
+ * From Phase 1 the app gates on setup, so a fresh browser lands on onboarding
+ * rather than Today. Capturing only the tabs would miss the flow entirely, and
+ * capturing only a fresh context would show onboarding five times. So each
+ * profile does two passes in one context: walk the setup steps, then finish
+ * setup and walk the tabs.
+ */
+async function captureSetup(page, baseUrl, out, profileName, fullPage, problems) {
+  const written = []
+
+  await openTab(page, baseUrl, '#/onboarding', problems)
+
+  for (let step = 1; step <= 12; step += 1) {
+    const file = outPath(out, `${profileName}-setup-${String(step).padStart(2, '0')}.png`)
+    await page.screenshot({ path: file, fullPage, type: 'png', animations: 'disabled' })
+    written.push(file)
+
+    // The forward action is labelled by position: "Start setup" on welcome and
+    // "Continue" through the questions. "Finish setup" ends the flow, so it is
+    // deliberately excluded — leaving onboarding belongs to the tab pass.
+    const next = page.getByRole('button', { name: /^(start setup|continue|done)$/i })
+    if ((await next.count()) === 0 || !(await next.first().isEnabled())) break
+    await next.first().click()
+    await page.waitForTimeout(SETTLE_MS)
+  }
+
+  return written
+}
+
+/** Leave setup by the documented escape hatch so the tabs render a real profile. */
+async function finishSetup(page, baseUrl, problems) {
+  await openTab(page, baseUrl, '#/onboarding', problems)
+  const skip = page.getByRole('button', { name: /skip setup/i })
+  if ((await skip.count()) > 0) {
+    await skip.first().click()
+  } else {
+    const finish = page.getByRole('button', { name: /finish setup/i })
+    if ((await finish.count()) > 0) await finish.first().click()
+  }
+  await page.waitForTimeout(SETTLE_MS)
+}
+
 async function captureProfile(browser, profile, { baseUrl, out, fullPage }) {
   const context = await browser.newContext({
     viewport: { width: profile.width, height: profile.height },
@@ -133,6 +175,9 @@ async function captureProfile(browser, profile, { baseUrl, out, fullPage }) {
   const written = []
 
   try {
+    written.push(...(await captureSetup(page, baseUrl, out, profile.name, fullPage, problems)))
+    await finishSetup(page, baseUrl, problems)
+
     for (const tab of TABS) {
       await openTab(page, baseUrl, tab.hash, problems)
 

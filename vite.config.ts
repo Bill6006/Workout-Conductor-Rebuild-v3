@@ -13,7 +13,8 @@ import { fileURLToPath, URL } from 'node:url'
 const REPO_BASE = '/Workout-Conductor-Rebuild-v3/'
 
 const buildMarker = process.env.VITE_BUILD_MARKER ?? 'local-dev'
-const buildPhase = process.env.VITE_BUILD_PHASE ?? 'Phase 0 - Repository, Live Pages, and Scaffold'
+const buildPhase =
+  process.env.VITE_BUILD_PHASE ?? 'Phase 1 - Product Foundation and First Useful Live Preview'
 const buildCommit = process.env.VITE_BUILD_COMMIT ?? 'local'
 const buildTime = process.env.VITE_BUILD_TIME ?? new Date().toISOString()
 
@@ -35,7 +36,12 @@ export default defineConfig(({ command }) => ({
     VitePWA({
       registerType: 'prompt',
       injectRegister: null,
-      includeAssets: ['icons/icon-192.png', 'icons/icon-512.png', 'icons/maskable-512.png', 'icons/favicon.svg'],
+      includeAssets: [
+        'icons/icon-192.png',
+        'icons/icon-512.png',
+        'icons/maskable-512.png',
+        'icons/favicon.svg',
+      ],
       manifest: {
         id: REPO_BASE,
         name: 'Workout Conductor',

@@ -1,0 +1,91 @@
+.stepper {
+  display: flex;
+  align-items: stretch;
+  gap: var(--wc-s-2);
+  width: 100%;
+  min-width: 0;
+}
+
+.step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  /*
+   * Measured: at 240 CSS px the row has 170px. Two 56px buttons would leave
+   * the field 42px, which is not enough to show the number at all — the value
+   * vanished. The buttons give width back first.
+   */
+  width: clamp(44px, 16vw, 56px);
+  min-height: 56px;
+  border: 1px solid var(--wc-line-strong);
+  border-radius: var(--wc-r-md);
+  background: var(--wc-surface-2);
+  color: var(--wc-text);
+  font: 600 clamp(18px, 6vw, 22px) / 1 var(--wc-font);
+  transition: background-color var(--wc-dur-fast) var(--wc-ease);
+}
+
+.step:not(:disabled):hover {
+  background: var(--wc-surface-3);
+}
+
+.step:not(:disabled):active {
+  transform: scale(0.97);
+}
+
+.step:disabled {
+  cursor: not-allowed;
+  border-color: var(--wc-line);
+  background: var(--wc-bg-elevated);
+  color: var(--wc-text-faint);
+}
+
+/*
+ * The typed field is the third target on this row, and it has to be as tappable
+ * as the two 56px buttons flanking it. `align-items: baseline` left the input at
+ * its own text height — 25.8px at 360px inside a 56px box — so a thumb aiming at
+ * the number landed on the wrapper and nothing happened. The wrapper is a
+ * `<label>` now and the input stretches to fill it, so the whole field is the
+ * target and the input's own box clears 44px.
+ */
+.fieldWrap {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: var(--wc-s-1);
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 56px;
+  padding: 0 clamp(3px, 1.8vw, 12px);
+  border: 1px solid var(--wc-line);
+  border-radius: var(--wc-r-md);
+  background: var(--wc-surface);
+}
+
+.field {
+  width: 100%;
+  min-width: 0;
+  /* Below the 56px wrapper, so it still fills a row the buttons have shrunk. */
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--wc-text);
+  font: 700 clamp(14px, 5.5vw, 22px) / 1.2 var(--wc-font-num);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  outline-offset: 4px;
+}
+
+.field:disabled {
+  color: var(--wc-text-faint);
+}
+
+.unit {
+  align-self: center;
+  flex: none;
+  font: var(--wc-t-small);
+  font-size: clamp(10px, 3.2vw, 13px);
+  color: var(--wc-text-muted);
+}

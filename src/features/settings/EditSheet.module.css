@@ -1,0 +1,50 @@
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-4);
+  min-width: 0;
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-2);
+  min-width: 0;
+}
+
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--wc-s-2);
+  min-width: 0;
+}
+
+.buttons > * {
+  flex: 1 1 120px;
+  min-width: 0;
+}
+
+.blocked {
+  font: var(--wc-t-small);
+  color: var(--wc-warn);
+  overflow-wrap: break-word;
+}
+
+.failure {
+  padding: var(--wc-s-3);
+  border: 1px solid var(--wc-danger);
+  border-radius: var(--wc-r-md);
+  background: var(--wc-surface-2);
+  font: var(--wc-t-small);
+  color: var(--wc-text);
+  overflow-wrap: break-word;
+}
+
+/* Doubled selector so it outranks PrimaryAction's own variant class, whatever
+   order the two CSS modules end up in. */
+.danger.danger {
+  border-color: var(--wc-danger);
+  background: var(--wc-danger);
+  color: var(--wc-lime-ink);
+  box-shadow: none;
+}

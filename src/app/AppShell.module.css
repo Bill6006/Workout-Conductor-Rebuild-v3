@@ -51,19 +51,29 @@
 
 /*
  * The tagline has to survive a 360px phone next to the mark and the phase
- * pill. Tracking is what costs the most room at this size, so it scales down
- * with the viewport before the type size does; the nowrap/ellipsis pair stays
- * as a last resort rather than the normal state.
+ * pill, in whichever face the device resolves --wc-font to. It was clipped in
+ * Roboto (Android's answer) and in DejaVu Sans (the CI runner's) because
+ * `nowrap` left one line as the only option and the string is wider than the
+ * gap between the mark and the pill in both.
+ *
+ * So it is given the room instead of being cut: tracking still scales down
+ * with the viewport, and when one line still will not do the text wraps
+ * rather than losing its last word. There is no line clamp on purpose — a
+ * clamp keeps `scrollWidth === clientWidth` true while quietly throwing the
+ * end of the string away, which is the same defect wearing a tidier hat. At
+ * 240 CSS px (a 360px phone at 150% zoom) the strip beside the phase pill is
+ * only ~85px wide, so it takes three or four short lines there and the header
+ * grows to suit; `anywhere` is what stops the one long word, HYPERTROPHY,
+ * from pushing the page sideways instead of breaking.
  */
 .tagline {
   font: var(--wc-t-label);
-  font-size: clamp(9.5px, 2.75vw, 11px);
-  letter-spacing: clamp(0.005em, 0.85vw - 2.6px, 0.08em);
+  font-size: clamp(9.5px, 2.6vw, 11px);
+  line-height: 1.25;
+  letter-spacing: clamp(0.004em, 0.62vw - 1.85px, 0.06em);
   text-transform: uppercase;
   color: var(--wc-text-muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
 }
 
 .phase {
@@ -77,4 +87,13 @@
   gap: var(--wc-s-6);
   min-width: 0;
   padding: var(--wc-s-6) var(--wc-gutter) calc(var(--wc-nav-h) + var(--wc-safe-bottom) + var(--wc-s-7));
+}
+
+/*
+ * Setup is forced, so the shell has removed the bottom nav — the tail of
+ * padding that cleared it would otherwise be a band of dead space under the
+ * last control.
+ */
+.mainNoNav {
+  padding-bottom: calc(var(--wc-safe-bottom) + var(--wc-s-7));
 }

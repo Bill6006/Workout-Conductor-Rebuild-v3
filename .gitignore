@@ -29,11 +29,21 @@ lerna-debug.log*
 logs/
 *.log
 
-# Editors
+# Editors and agent tooling
 .vscode/*
 !.vscode/extensions.json
 .idea/
 *.swp
+
+# Agent/assistant working directory. Its contents are machine-specific: a
+# launch config pointing at a local dev server, local permission grants, and
+# session scratch. None of it describes the project, and a launch config that
+# hard-codes one machine's port or path is actively misleading to check in.
+# Ignored wholesale rather than per-file, with one deliberate exception: if a
+# genuinely shared, reviewed agent config is ever wanted, un-ignore that single
+# file the way .vscode/extensions.json is un-ignored above, so the shared part
+# is an explicit, reviewable opt-in and the local part stays out.
+.claude/
 
 # OS junk
 .DS_Store

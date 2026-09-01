@@ -115,6 +115,17 @@ const ORIGIN_ALLOWED_HOSTS = new Set([
   'raw.githubusercontent.com',
   'registry.npmjs.org',
   'www.w3.org',
+  // JSON Schema dialect identifiers, not endpoints. zod's to-json-schema module
+  // writes one of three fixed strings into the `$schema` field of the object it
+  // returns — https://json-schema.org/draft/2020-12/schema,
+  // http://json-schema.org/draft-07/schema#, and .../draft-04/schema# — exactly
+  // as `www.w3.org` appears in an SVG xmlns. Verified in
+  // node_modules/zod/v4/core/to-json-schema.js: all three are `result.$schema =`
+  // assignments, there is no fetch/XHR/import anywhere near them, and the app
+  // never calls the function at all (the strings survive only because they are
+  // string literals in a module the bundler could not fully tree-shake). No
+  // network request is ever made to this host.
+  'json-schema.org',
   'localhost',
   '127.0.0.1',
   // Framework error-message URLs found in dist/assets/*.js and dist/sw.js.

@@ -1,0 +1,48 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-2);
+  min-width: 0;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--wc-s-1) var(--wc-s-3);
+  min-width: 0;
+}
+
+.counter {
+  flex: none;
+  font: var(--wc-t-label);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--wc-text-muted);
+}
+
+.name {
+  /* Drops to its own line rather than wrapping to three at 240 CSS px. */
+  flex: 1 1 120px;
+  min-width: 0;
+  font: var(--wc-t-small);
+  color: var(--wc-text-soft);
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.track {
+  overflow: hidden;
+  width: 100%;
+  height: 6px;
+  border-radius: var(--wc-r-pill);
+  background: var(--wc-surface-3);
+}
+
+.fill {
+  height: 100%;
+  border-radius: var(--wc-r-pill);
+  background: var(--wc-lime);
+  transition: inline-size var(--wc-dur) var(--wc-ease);
+}

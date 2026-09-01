@@ -5,53 +5,27 @@
   min-width: 0;
 }
 
-.rows {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-/* Non-functional in Phase 0: styled as clearly inactive, not as a live row. */
-.row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--wc-s-3);
-  width: 100%;
-  min-width: 0;
-  min-height: 52px;
-  padding: var(--wc-s-2) 0;
-  border-bottom: 1px solid var(--wc-line);
-  text-align: left;
-  color: var(--wc-text-faint);
-  cursor: not-allowed;
-}
-
-.rows > li:last-child .row {
-  border-bottom: 0;
-}
-
-.rowText {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.rowLabel {
-  font: var(--wc-t-body);
-  color: var(--wc-text-soft);
-  overflow-wrap: anywhere;
-}
-
-.rowHint {
+/* Only takes vertical space once a save has actually been verified. */
+.saved {
   font: var(--wc-t-small);
-  color: var(--wc-text-faint);
-  overflow-wrap: anywhere;
+  color: var(--wc-lime);
+  overflow-wrap: break-word;
 }
 
-.chevron {
-  flex: none;
+.saved:empty {
+  display: none;
+}
+
+.state {
+  font: var(--wc-t-small);
+  color: var(--wc-text-muted);
+  overflow-wrap: break-word;
+}
+
+.stateError {
+  font: var(--wc-t-body);
+  color: var(--wc-danger);
+  overflow-wrap: break-word;
 }
 
 .build {
@@ -105,6 +79,7 @@
 .aboutLine {
   font: var(--wc-t-small);
   color: var(--wc-text-muted);
+  overflow-wrap: break-word;
 }
 
 .link {

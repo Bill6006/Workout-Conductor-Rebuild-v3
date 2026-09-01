@@ -1,0 +1,49 @@
+.group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--wc-s-2);
+  min-width: 0;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  min-width: 44px;
+  max-width: 100%;
+  padding: var(--wc-s-2) var(--wc-s-4);
+  border: 1px solid var(--wc-line-strong);
+  border-radius: var(--wc-r-pill);
+  background: var(--wc-surface-2);
+  color: var(--wc-text-soft);
+  font: var(--wc-t-body);
+  text-align: center;
+  overflow-wrap: anywhere;
+  transition:
+    background-color var(--wc-dur-fast) var(--wc-ease),
+    border-color var(--wc-dur-fast) var(--wc-ease),
+    color var(--wc-dur-fast) var(--wc-ease);
+}
+
+.chip:not(:disabled):hover {
+  background: var(--wc-surface-3);
+}
+
+.on {
+  border-color: var(--wc-lime-edge);
+  background: var(--wc-lime-wash);
+  color: var(--wc-lime);
+}
+
+.on:not(:disabled):hover {
+  background: var(--wc-lime-wash);
+  border-color: var(--wc-lime);
+}
+
+.chip:disabled {
+  cursor: not-allowed;
+  border-color: var(--wc-line);
+  background: var(--wc-bg-elevated);
+  color: var(--wc-text-faint);
+}

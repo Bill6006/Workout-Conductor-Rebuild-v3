@@ -2,18 +2,23 @@ import { describe, expect, it } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { AppShell } from './AppShell'
+import { SetupStateContext, type SetupState } from './setupGate'
 
-function renderShell(path = '/') {
-  return render(
+function renderShell(path = '/', setup?: SetupState) {
+  const tree = (
     <MemoryRouter initialEntries={[path]}>
       <Routes>
         <Route element={<AppShell />}>
           <Route path="/" element={<h1>Screen under test</h1>} />
           <Route path="/settings" element={<h1>Settings</h1>} />
+          <Route path="/onboarding" element={<h1>Set up Workout Conductor</h1>} />
         </Route>
       </Routes>
-    </MemoryRouter>,
+    </MemoryRouter>
   )
+
+  if (!setup) return render(tree)
+  return render(<SetupStateContext.Provider value={setup}>{tree}</SetupStateContext.Provider>)
 }
 
 describe('AppShell', () => {
@@ -47,6 +52,35 @@ describe('AppShell', () => {
 
   it('mounts the persistent bottom navigation alongside the screen', () => {
     renderShell()
+    expect(screen.getByRole('navigation', { name: 'Primary' })).toBeInTheDocument()
+  })
+
+  /**
+   * The shell renders around the gate, so it cannot ask the gate what it
+   * decided — it reads the same published verdict instead. Both branches are
+   * pinned here because this is the only place either one is a decision rather
+   * than a consequence.
+   *
+   * Forced setup means every tab bounces straight back, so the nav would be
+   * five focusable controls that do nothing. Being on the setup route is NOT
+   * on its own a reason to take the nav away.
+   */
+  it('takes the bottom navigation away while setup is being forced', () => {
+    renderShell('/onboarding', { forcingSetup: true, onSetup: true })
+
+    expect(screen.queryByRole('navigation', { name: 'Primary' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'Today' })).not.toBeInTheDocument()
+  })
+
+  it('keeps the bottom navigation on the setup route when setup is not being forced', () => {
+    renderShell('/onboarding', { forcingSetup: false, onSetup: true })
+
+    expect(screen.getByRole('navigation', { name: 'Primary' })).toBeInTheDocument()
+  })
+
+  it('keeps the bottom navigation on an ordinary route while setup is unfinished elsewhere', () => {
+    renderShell('/', { forcingSetup: true, onSetup: false })
+
     expect(screen.getByRole('navigation', { name: 'Primary' })).toBeInTheDocument()
   })
 

@@ -1,5 +1,7 @@
 import { expect, test, type Page } from '@playwright/test'
-import { MOBILE_WIDTHS, ROUTES } from './routes'
+import { seedProfile, startFresh, startWithProfile } from './appState'
+import { MOBILE_WIDTHS, NARROW_WIDTH, ROUTES, SETUP_STEPS } from './routes'
+import { walkSetup } from './setupFlow'
 
 /**
  * Layout geometry depends on viewport width, not on the device profile, so
@@ -10,6 +12,12 @@ test.describe.configure({ mode: 'parallel' })
 
 /** One CSS pixel of slack absorbs sub-pixel rounding at fractional scales. */
 const OVERFLOW_SLACK = 1
+
+/**
+ * The longest values the schema will take, so the sweep measures the worst case
+ * a real user can create rather than the tidy defaults.
+ */
+const LONG_NAME = 'The Sixty Character Limit Strength And Conditioning Facility'
 
 async function horizontalOverflow(page: Page) {
   return page.evaluate(() => ({
@@ -42,71 +50,183 @@ async function expectNoHorizontalOverflow(page: Page, context: string) {
   ).toBeLessThanOrEqual(innerWidth + OVERFLOW_SLACK)
 }
 
-for (const width of MOBILE_WIDTHS) {
-  test(`no horizontal overflow at ${width}px on any tab`, async ({ page }) => {
-    await page.setViewportSize({ width, height: 800 })
+test.describe('the app, on a device that has finished setup', () => {
+  test.beforeEach(async ({ page }) => {
+    // A long location name and a long note are the two strings a user can make
+    // arbitrarily wide; Today and Settings both render them.
+    await startWithProfile(
+      page,
+      seedProfile({
+        locations: [
+          {
+            id: 'loc-gym',
+            name: LONG_NAME,
+            kind: 'gym',
+            equipment: ['barbell', 'dumbbells', 'squat-rack', 'cable-machine', 'lat-pulldown'],
+            notes: '',
+          },
+        ],
+        activeLocationId: 'loc-gym',
+        schedule: {
+          sessionsPerWeek: 7,
+          typicalDurationMin: 180,
+          availableDays: ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'],
+        },
+        exercisePreferences: {
+          preferred: ['Bulgarian split squat with a very long descriptive name'],
+          disliked: [],
+        },
+      }),
+    )
+  })
+
+  for (const width of MOBILE_WIDTHS) {
+    test(`no horizontal overflow at ${width}px on any tab`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 800 })
+
+      for (const route of ROUTES) {
+        await page.goto(`./${route.hash}`)
+        await expect(page.getByRole('heading', { level: 1, name: route.heading })).toBeVisible()
+        await expectNoHorizontalOverflow(page, `${width}px · ${route.tab}`)
+      }
+    })
+  }
+
+  /**
+   * 150% browser zoom on a 360px handset leaves 240 CSS pixels of layout width.
+   * Setting the viewport to the CSS-pixel equivalent reproduces that exactly and
+   * keeps every measurement in the same unit — a `zoom: 1.5` style tag would put
+   * the assertions and the layout in different coordinate spaces.
+   */
+  test('survives 150% zoom (240 CSS px of layout width)', async ({ page }) => {
+    await page.setViewportSize({ width: NARROW_WIDTH, height: 533 })
 
     for (const route of ROUTES) {
       await page.goto(`./${route.hash}`)
       await expect(page.getByRole('heading', { level: 1, name: route.heading })).toBeVisible()
-      await expectNoHorizontalOverflow(page, `${width}px · ${route.tab}`)
+      await expectNoHorizontalOverflow(page, `zoomed · ${route.tab}`)
+    }
+
+    const nav = page.getByRole('navigation', { name: 'Primary' })
+    await expect(nav).toBeVisible()
+
+    const navBox = await nav.boundingBox()
+    expect(navBox).not.toBeNull()
+    expect(navBox!.x).toBeGreaterThanOrEqual(-OVERFLOW_SLACK)
+    expect(navBox!.x + navBox!.width).toBeLessThanOrEqual(NARROW_WIDTH + OVERFLOW_SLACK)
+    expect(navBox!.y + navBox!.height).toBeLessThanOrEqual(533 + OVERFLOW_SLACK)
+
+    await expect(nav.getByRole('link')).toHaveCount(ROUTES.length)
+    for (const route of ROUTES) {
+      const link = nav.getByRole('link', { name: route.tab, exact: true })
+      await expect(link).toBeVisible()
+
+      // The label carries `text-overflow: ellipsis`, so a too-narrow tab would
+      // still be "visible" while reading "Progr…". Measure the text instead.
+      const truncated = await link
+        .locator('span')
+        .last()
+        .evaluate((label) => {
+          return label.scrollWidth > label.clientWidth + 1
+        })
+      expect(truncated, `${route.tab} tab label is truncated at 240px`).toBe(false)
     }
   })
-}
 
-/**
- * 150% browser zoom on a 360px handset leaves 240 CSS pixels of layout width.
- * Setting the viewport to the CSS-pixel equivalent reproduces that exactly and
- * keeps every measurement in the same unit — a `zoom: 1.5` style tag would put
- * the assertions and the layout in different coordinate spaces.
- */
-test('survives 150% zoom (240 CSS px of layout width)', async ({ page }) => {
-  await page.setViewportSize({ width: 240, height: 533 })
+  test('every bottom-nav target clears the 44px thumb-reach floor', async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 800 })
+    await page.goto('./')
 
-  for (const route of ROUTES) {
-    await page.goto(`./${route.hash}`)
-    await expect(page.getByRole('heading', { level: 1, name: route.heading })).toBeVisible()
-    await expectNoHorizontalOverflow(page, `zoomed · ${route.tab}`)
+    const nav = page.getByRole('navigation', { name: 'Primary' })
+    await expect(nav).toBeVisible()
+
+    for (const route of ROUTES) {
+      const box = await nav.getByRole('link', { name: route.tab, exact: true }).boundingBox()
+
+      expect(box, `${route.tab} tab has no box`).not.toBeNull()
+      expect(box!.height, `${route.tab} tab is only ${box!.height}px tall`).toBeGreaterThanOrEqual(44)
+      expect(box!.width, `${route.tab} tab is only ${box!.width}px wide`).toBeGreaterThanOrEqual(44)
+    }
+  })
+
+  /**
+   * The widest thing the app renders: an equipment sheet with seventeen chips, a
+   * four-way segmented control, and a textarea, stacked inside a bottom sheet.
+   */
+  for (const width of [NARROW_WIDTH, 360] as const) {
+    test(`a settings sheet stays inside a ${width}px viewport`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 800 })
+      await page.goto('./#/settings')
+      await expect(page.getByRole('heading', { level: 1, name: 'Settings' })).toBeVisible()
+
+      await page.getByRole('button', { name: 'Gym location' }).click()
+      const sheet = page.getByRole('dialog')
+      await expect(sheet).toBeVisible()
+      await expectNoHorizontalOverflow(page, `${width}px · location sheet`)
+
+      const box = await sheet.boundingBox()
+      expect(box).not.toBeNull()
+      expect(box!.x).toBeGreaterThanOrEqual(-OVERFLOW_SLACK)
+      expect(box!.x + box!.width).toBeLessThanOrEqual(width + OVERFLOW_SLACK)
+    })
   }
 
-  const nav = page.getByRole('navigation', { name: 'Primary' })
-  await expect(nav).toBeVisible()
+  test('the demo session card fits the narrowest viewport', async ({ page }) => {
+    await page.setViewportSize({ width: NARROW_WIDTH, height: 800 })
+    await page.goto('./')
 
-  const navBox = await nav.boundingBox()
-  expect(navBox).not.toBeNull()
-  expect(navBox!.x).toBeGreaterThanOrEqual(-OVERFLOW_SLACK)
-  expect(navBox!.x + navBox!.width).toBeLessThanOrEqual(240 + OVERFLOW_SLACK)
-  expect(navBox!.y + navBox!.height).toBeLessThanOrEqual(533 + OVERFLOW_SLACK)
+    const card = page
+      .locator('section')
+      .filter({ has: page.getByRole('heading', { level: 2, name: 'Upper body — strength and size' }) })
 
-  await expect(nav.getByRole('link')).toHaveCount(ROUTES.length)
-  for (const route of ROUTES) {
-    const link = nav.getByRole('link', { name: route.tab, exact: true })
-    await expect(link).toBeVisible()
-
-    // The label carries `text-overflow: ellipsis`, so a too-narrow tab would
-    // still be "visible" while reading "Progr…". Measure the text instead.
-    const truncated = await link
-      .locator('span')
-      .last()
-      .evaluate((label) => {
-        return label.scrollWidth > label.clientWidth + 1
-      })
-    expect(truncated, `${route.tab} tab label is truncated at 240px`).toBe(false)
-  }
+    await expect(card).toBeVisible()
+    const box = await card.boundingBox()
+    expect(box).not.toBeNull()
+    expect(box!.x + box!.width).toBeLessThanOrEqual(NARROW_WIDTH + OVERFLOW_SLACK)
+    await expectNoHorizontalOverflow(page, `${NARROW_WIDTH}px · demo card`)
+  })
 })
 
-test('every bottom-nav target clears the 44px thumb-reach floor', async ({ page }) => {
-  await page.setViewportSize({ width: 360, height: 800 })
-  await page.goto('./')
+test.describe('setup, on a first visit', () => {
+  test.beforeEach(async ({ page }) => {
+    await startFresh(page)
+  })
 
-  const nav = page.getByRole('navigation', { name: 'Primary' })
-  await expect(nav).toBeVisible()
+  for (const width of [...MOBILE_WIDTHS, NARROW_WIDTH] as const) {
+    test(`no horizontal overflow at ${width}px on any setup step`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 800 })
+      await page.goto('./')
 
-  for (const route of ROUTES) {
-    const box = await nav.getByRole('link', { name: route.tab, exact: true }).boundingBox()
+      await walkSetup(page, async (index) => {
+        await expectNoHorizontalOverflow(page, `${width}px · setup: ${SETUP_STEPS[index].name}`)
+      })
 
-    expect(box, `${route.tab} tab has no box`).not.toBeNull()
-    expect(box!.height, `${route.tab} tab is only ${box!.height}px tall`).toBeGreaterThanOrEqual(44)
-    expect(box!.width, `${route.tab} tab is only ${box!.width}px wide`).toBeGreaterThanOrEqual(44)
+      await expect(page.getByRole('heading', { level: 1, name: 'Today', exact: true })).toBeVisible()
+      await expectNoHorizontalOverflow(page, `${width}px · Today after setup`)
+    })
   }
+
+  /**
+   * The dock used to have to clear the bottom navigation, because the shell
+   * painted one over forced setup. It no longer does: while the gate is
+   * forcing setup every tab bounces back here, so the nav is removed and the
+   * dock takes the room it was reserving. What still has to hold is that the
+   * forward action is a real thumb target and sits inside the viewport.
+   */
+  test('the setup action dock sits inside the viewport at 240px, with no nav to clear', async ({ page }) => {
+    await page.setViewportSize({ width: NARROW_WIDTH, height: 640 })
+    await page.goto('./')
+
+    const forward = page.getByRole('button', { name: 'Start setup', exact: true })
+    await expect(forward).toBeVisible()
+    await expect(page.getByRole('navigation', { name: 'Primary' })).toHaveCount(0)
+
+    const action = await forward.boundingBox()
+    expect(action).not.toBeNull()
+
+    expect(action!.height, 'the forward action is under the 44px thumb floor').toBeGreaterThanOrEqual(44)
+    expect(action!.y + action!.height, 'the setup dock hangs below the viewport').toBeLessThanOrEqual(
+      640 + OVERFLOW_SLACK,
+    )
+  })
 })

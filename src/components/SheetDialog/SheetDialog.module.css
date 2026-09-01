@@ -1,0 +1,120 @@
+.layer {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  background: var(--wc-scrim);
+  animation: fade var(--wc-dur) var(--wc-ease);
+}
+
+.sheet {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-3);
+  width: 100%;
+  max-width: var(--wc-shell-max);
+  max-height: 88dvh;
+  padding: var(--wc-s-3) var(--wc-gutter) calc(var(--wc-s-5) + var(--wc-safe-bottom));
+  border: 1px solid var(--wc-line-strong);
+  border-bottom: 0;
+  border-radius: var(--wc-r-xl) var(--wc-r-xl) 0 0;
+  background: var(--wc-surface);
+  box-shadow: var(--wc-shadow-sheet);
+  animation: rise var(--wc-dur) var(--wc-ease);
+}
+
+.grabber {
+  flex: none;
+  width: 40px;
+  height: 4px;
+  margin: 0 auto var(--wc-s-1);
+  border-radius: var(--wc-r-pill);
+  background: var(--wc-line-strong);
+}
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--wc-s-3);
+  min-width: 0;
+}
+
+.title {
+  min-width: 0;
+  font: var(--wc-t-title);
+  color: var(--wc-text);
+  overflow-wrap: anywhere;
+}
+
+.close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  margin: -8px -8px 0 0;
+  border-radius: var(--wc-r-pill);
+  color: var(--wc-text-muted);
+  font: 600 22px / 1 var(--wc-font);
+}
+
+.close:hover {
+  color: var(--wc-text);
+}
+
+.description {
+  font: var(--wc-t-small);
+  color: var(--wc-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-3);
+  overflow-y: auto;
+  min-width: 0;
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--wc-s-2);
+  min-width: 0;
+}
+
+.footer > * {
+  flex: 1 1 130px;
+  min-width: 0;
+}
+
+@keyframes rise {
+  from {
+    transform: translateY(14%);
+    opacity: 0;
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Movement is the one thing a reduced-motion user asked us to drop. */
+@media (prefers-reduced-motion: reduce) {
+  .sheet,
+  .backdrop {
+    animation: none;
+  }
+}

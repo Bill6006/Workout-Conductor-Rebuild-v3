@@ -1,0 +1,29 @@
+.rows {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-2);
+  min-width: 0;
+}
+
+.textarea {
+  width: 100%;
+  min-width: 0;
+  min-height: 96px;
+  padding: var(--wc-s-3);
+  border: 1px solid var(--wc-line-strong);
+  border-radius: var(--wc-r-md);
+  background: var(--wc-surface-2);
+  color: var(--wc-text);
+  font: var(--wc-t-body);
+  resize: vertical;
+}
+
+.textarea:focus-visible {
+  border-color: var(--wc-lime-edge);
+}
