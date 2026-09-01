@@ -1,0 +1,59 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+dev-dist/
+.vite/
+*.tsbuildinfo
+
+# Test output
+coverage/
+playwright-report/
+test-results/
+blob-report/
+.playwright/
+
+# Local environment and machine-specific overrides
+*.local
+.env
+.env.*
+!.env.example
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+logs/
+*.log
+
+# Editors
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---------------------------------------------------------------------------
+# Never commit user data.
+#
+# Workout Conductor is local-first: real training history lives in the browser's
+# IndexedDB and belongs to the person using the app, not to this repository.
+# Exported backups, restored history, and hand-made "just for testing" dumps all
+# contain personal data. Test fixtures must be synthetic and explicitly named as
+# fixtures; anything matching the patterns below is blocked outright.
+#
+# npm run privacy:scan enforces the same rule in CI. If a file you need is being
+# ignored here, rename the fixture rather than loosening these lines.
+# ---------------------------------------------------------------------------
+*.backup.json
+workout-history*.json
+/backups/
+/private/
+*.user.json

@@ -1,0 +1,94 @@
+name: CI
+
+# main is deliberately excluded from the push trigger. pages.yml runs the same
+# gate on every push to main before it deploys, so leaving main in here would run
+# the entire suite twice per merge — double the Actions minutes and double the
+# pressure on the Pages queue for no extra signal.
+#
+# Coverage after the exclusion:
+#   - push to a feature branch -> CI (here)
+#   - pull request             -> CI (here)
+#   - push to main             -> pages.yml, full gate, exactly once
+on:
+  push:
+    branches-ignore: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Same step order as the gate in pages.yml, so the two cannot drift:
+  #   npm ci -> lint -> typecheck -> unit tests -> build -> privacy scan ->
+  #   verify:build -> install chromium -> end-to-end tests
+  #
+  # Build comes before every step that reads dist/, and it is the step that
+  # injects the VITE_BUILD_* marker verify:build then asserts.
+  verify:
+    name: Lint, typecheck, test, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Resolve build metadata
+        run: |
+          echo "SHORT_SHA=$(echo "${GITHUB_SHA}" | cut -c1-7)" >> "$GITHUB_ENV"
+          echo "BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_ENV"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit tests
+        run: npm run test
+
+      - name: Build
+        run: npm run build
+        env:
+          VITE_BUILD_MARKER: ci-${{ github.run_number }}-${{ env.SHORT_SHA }}
+          VITE_BUILD_PHASE: 'Phase 0 - Repository, Live Pages, and Scaffold'
+          VITE_BUILD_COMMIT: ${{ env.SHORT_SHA }}
+          VITE_BUILD_TIME: ${{ env.BUILD_TIME }}
+
+      - name: Privacy scan
+        run: npm run privacy:scan
+
+      - name: Verify build output
+        run: npm run verify:build
+        env:
+          # Same marker the build step injected, so the check is exact.
+          VITE_BUILD_MARKER: ci-${{ github.run_number }}-${{ env.SHORT_SHA }}
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: End-to-end tests
+        run: npm run test:e2e
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ github.run_number }}
+          path: playwright-report/
+          retention-days: 7
+          if-no-files-found: ignore

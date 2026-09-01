@@ -1,0 +1,121 @@
+name: Deploy to GitHub Pages
+
+# This is the only workflow that runs on main. ci.yml deliberately ignores main
+# so the same gate is not paid for twice; see .github/workflows/ci.yml.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deployment at a time, and never cancel one in flight: a half-published
+# Pages deployment is worse than a queued one.
+concurrency:
+  group: 'pages'
+  cancel-in-progress: false
+
+jobs:
+  # The full quality gate runs BEFORE the artifact is produced, in this order:
+  #
+  #   npm ci -> lint -> typecheck -> unit tests -> build -> privacy scan ->
+  #   verify:build -> install chromium -> browser smoke test -> upload artifact
+  #
+  # The order matters. `npm run build` is the only step that produces dist/, and
+  # it is the only step that injects the VITE_BUILD_* marker. Everything after it
+  # inspects that one directory: verify:build asserts the marker is baked in, and
+  # the browser smoke test previews it (playwright.config.ts skips its own build
+  # under CI for exactly this reason, so the tested bytes are the deployed bytes).
+  #
+  # The artifact upload is the LAST step on purpose. Every step above it is a hard
+  # failure, so a failing gate means no artifact, which means the deploy job never
+  # runs, which means the previously deployed site stays live and untouched.
+  build:
+    name: Gate and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Resolve build metadata
+        run: |
+          echo "SHORT_SHA=$(echo "${GITHUB_SHA}" | cut -c1-7)" >> "$GITHUB_ENV"
+          echo "BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_ENV"
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit tests
+        run: npm run test
+
+      - name: Build
+        run: npm run build
+        env:
+          VITE_BUILD_MARKER: phase0-${{ github.run_number }}-${{ env.SHORT_SHA }}
+          VITE_BUILD_PHASE: 'Phase 0 - Repository, Live Pages, and Scaffold'
+          VITE_BUILD_COMMIT: ${{ env.SHORT_SHA }}
+          VITE_BUILD_TIME: ${{ env.BUILD_TIME }}
+
+      - name: Privacy scan
+        run: npm run privacy:scan
+
+      - name: Verify build output
+        run: npm run verify:build
+        env:
+          # Must match the marker injected by the build step above, exactly.
+          VITE_BUILD_MARKER: phase0-${{ github.run_number }}-${{ env.SHORT_SHA }}
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Browser smoke test
+        run: npm run test:e2e
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ github.run_number }}
+          path: playwright-report/
+          retention-days: 7
+          if-no-files-found: ignore
+
+      # LAST step of the job. Nothing may be added below it.
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

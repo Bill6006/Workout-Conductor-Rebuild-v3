@@ -1,0 +1,19 @@
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-2);
+  min-width: 0;
+}
+
+.title {
+  font: var(--wc-t-display);
+  color: var(--wc-text);
+  letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
+}
+
+.subtitle {
+  font: var(--wc-t-body);
+  color: var(--wc-text-muted);
+  max-width: 46ch;
+}

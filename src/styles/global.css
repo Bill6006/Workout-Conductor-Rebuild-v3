@@ -1,0 +1,137 @@
+@import './tokens.css';
+
+/* ---------------------------------------------------------------- reset */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--wc-bg);
+  color: var(--wc-text);
+  font: var(--wc-t-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overscroll-behavior-y: none;
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+figure {
+  margin: 0;
+}
+
+/* Layout reset — safe on every list, strips no semantics. */
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+}
+
+/*
+ * ACCESSIBILITY CONTRACT — read before adding a list.
+ *
+ * Removing the marker is not free: WebKit/VoiceOver stops announcing a list
+ * whose computed `list-style` is `none`, so the "list, 5 items" affordance
+ * silently disappears from the bottom nav and every grouped list. CSS cannot
+ * put it back; only markup can.
+ *
+ * So this rule is scoped to `[role='list']`. A list that carries the role gets
+ * the flat look and keeps its semantics; a list that forgets it keeps its
+ * bullets, which fails visibly in review instead of costing a screen-reader
+ * user the item count.
+ */
+[role='list'] {
+  list-style: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+a {
+  color: var(--wc-lime);
+  text-decoration: none;
+}
+
+img,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+/*
+ * Ring only. `:focus-visible` has the same specificity as a CSS-module class,
+ * so setting `border-radius` here would clobber a component's own radius on
+ * focus — a pill button visibly squaring off the moment it is tabbed to. The
+ * outline follows the element's existing border-radius in every modern
+ * browser, so there is nothing to add.
+ */
+:focus-visible {
+  outline: 2px solid var(--wc-lime);
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------ utilities */
+
+.wc-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.wc-eyebrow {
+  font: var(--wc-t-label);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--wc-text-muted);
+}
+
+/* Ambient lime bloom behind the shell header — subtle, no gamer glow. */
+.wc-aurora {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(120% 46% at 50% -8%, var(--wc-aurora-lime), transparent 62%),
+    radial-gradient(90% 40% at 90% 4%, var(--wc-aurora-info), transparent 70%);
+}

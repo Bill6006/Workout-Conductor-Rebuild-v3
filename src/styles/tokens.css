@@ -1,0 +1,119 @@
+/*
+ * Workout Conductor — design tokens.
+ *
+ * Single source of truth for colour, type, spacing, radius, and elevation.
+ * Feature and component CSS must consume these variables rather than raw
+ * hex values, so a future theme change stays a one-file edit.
+ */
+
+:root {
+  color-scheme: dark;
+
+  /* ---- Surfaces: near-black charcoal, warmed very slightly ---- */
+  --wc-bg: #0a0b0a;
+  --wc-bg-elevated: #101210;
+  --wc-surface: #161815;
+  --wc-surface-2: #1e211d;
+  --wc-surface-3: #272b25;
+  --wc-scrim: rgba(6, 7, 6, 0.72);
+
+  /* ---- Lines and separators ---- */
+  --wc-line: rgba(255, 255, 255, 0.07);
+  --wc-line-strong: rgba(255, 255, 255, 0.14);
+
+  /* ---- Primary accent: lime ---- */
+  --wc-lime: #ccff33;
+  --wc-lime-bright: #dcff6b;
+  --wc-lime-deep: #a8d621;
+  --wc-lime-ink: #101403;
+  --wc-lime-wash: rgba(204, 255, 51, 0.12);
+  --wc-lime-edge: rgba(204, 255, 51, 0.34);
+
+  /* ---- Coach gold (reserved: one Adaptive Coach surface, Phase 6) ---- */
+  --wc-gold: #f5c65a;
+  --wc-gold-wash: rgba(245, 198, 90, 0.12);
+
+  /* ---- Text ---- */
+  --wc-text: #ffffff;
+  --wc-text-soft: #d5d8d2;
+  --wc-text-muted: #8d938a;
+  /*
+   * Faint is real, readable text (build stamp, stat footnotes, empty rows), so
+   * it must clear WCAG 2.1 AA 4.5:1 on every surface it lands on — not just the
+   * darkest one. Measured against the surfaces it is actually painted on:
+   *   --wc-bg #0a0b0a 5.57:1 · --wc-bg-elevated #101210 5.32:1
+   *   --wc-surface #161815 5.05:1 · --wc-surface-2 #1e211d 4.60:1
+   * The previous #61665e failed everywhere (3.35:1 / 3.20:1 / 3.04:1 / 2.77:1).
+   * Still a clear step below --wc-text-muted (5.68:1 on --wc-surface).
+   */
+  --wc-text-faint: #848a81;
+
+  /* ---- Status ---- */
+  --wc-ok: #6ee7a8;
+  --wc-warn: #f0b849;
+  --wc-danger: #ff6b6b;
+  --wc-info: #7cc4ff;
+
+  /*
+   * Ambient bloom behind the shell header. Derived from the accent tokens
+   * rather than restated as rgba(), so retinting the app is still one edit.
+   * `color-mix(... , transparent)` premultiplies, so these resolve to exactly
+   * rgba(204, 255, 51, 0.09) and rgba(124, 196, 255, 0.045).
+   */
+  --wc-aurora-lime: color-mix(in srgb, var(--wc-lime) 9%, transparent);
+  --wc-aurora-info: color-mix(in srgb, var(--wc-info) 4.5%, transparent);
+
+  /* ---- Radius: large, rounded cards ---- */
+  --wc-r-sm: 10px;
+  --wc-r-md: 16px;
+  --wc-r-lg: 22px;
+  --wc-r-xl: 28px;
+  --wc-r-pill: 999px;
+
+  /* ---- Spacing scale ---- */
+  --wc-s-1: 4px;
+  --wc-s-2: 8px;
+  --wc-s-3: 12px;
+  --wc-s-4: 16px;
+  --wc-s-5: 20px;
+  --wc-s-6: 24px;
+  --wc-s-7: 32px;
+  --wc-s-8: 40px;
+
+  /* ---- Typography ---- */
+  --wc-font: 'Inter', 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  --wc-font-num: 'Inter', 'Segoe UI', system-ui, sans-serif;
+
+  --wc-t-display: 700 clamp(26px, 7.4vw, 34px) / 1.08 var(--wc-font);
+  --wc-t-title: 700 clamp(19px, 5.2vw, 23px) / 1.18 var(--wc-font);
+  --wc-t-heading: 650 17px / 1.25 var(--wc-font);
+  --wc-t-body: 400 15px / 1.45 var(--wc-font);
+  --wc-t-small: 400 13px / 1.4 var(--wc-font);
+  --wc-t-label: 600 11px / 1.2 var(--wc-font);
+
+  /* ---- Elevation ---- */
+  --wc-shadow-card: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 12px 30px -18px rgba(0, 0, 0, 0.9);
+  --wc-shadow-sheet: 0 -18px 50px -20px rgba(0, 0, 0, 0.95);
+  --wc-shadow-lime: 0 10px 28px -14px rgba(204, 255, 51, 0.55);
+
+  /* ---- Layout ---- */
+  --wc-shell-max: 520px;
+  --wc-nav-h: 62px;
+  --wc-gutter: clamp(14px, 4.2vw, 20px);
+  --wc-safe-top: env(safe-area-inset-top, 0px);
+  --wc-safe-bottom: env(safe-area-inset-bottom, 0px);
+
+  /* ---- Motion ---- */
+  --wc-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --wc-dur-fast: 130ms;
+  --wc-dur: 220ms;
+  --wc-dur-slow: 340ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --wc-dur-fast: 1ms;
+    --wc-dur: 1ms;
+    --wc-dur-slow: 1ms;
+  }
+}

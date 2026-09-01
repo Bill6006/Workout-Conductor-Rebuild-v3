@@ -1,0 +1,80 @@
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-6);
+  min-width: 0;
+}
+
+.week {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--wc-s-1);
+  min-width: 0;
+}
+
+.day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--wc-s-1);
+  min-width: 0;
+  padding: var(--wc-s-2) 0;
+  border: 1px solid var(--wc-line);
+  border-radius: var(--wc-r-sm);
+  background: var(--wc-bg-elevated);
+}
+
+.dayName {
+  font: var(--wc-t-label);
+  letter-spacing: 0.02em;
+  color: var(--wc-text-muted);
+}
+
+.dayValue {
+  font: var(--wc-t-small);
+  color: var(--wc-text-faint);
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--wc-s-3);
+  min-width: 0;
+  min-height: 40px;
+  border-bottom: 1px solid var(--wc-line);
+}
+
+.row:last-child {
+  border-bottom: 0;
+}
+
+.rowLabel {
+  font: var(--wc-t-body);
+  color: var(--wc-text-soft);
+  overflow-wrap: anywhere;
+}
+
+.rowValue {
+  flex: none;
+  margin: 0;
+  font: var(--wc-t-body);
+  color: var(--wc-text-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.caption {
+  font: var(--wc-t-small);
+  color: var(--wc-text-muted);
+}
+
+.empty {
+  font: var(--wc-t-body);
+  color: var(--wc-text-muted);
+}

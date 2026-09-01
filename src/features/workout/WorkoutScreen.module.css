@@ -1,0 +1,50 @@
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-6);
+  min-width: 0;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--wc-s-4);
+  min-width: 0;
+  padding: var(--wc-s-5) 0 var(--wc-s-2);
+  text-align: center;
+}
+
+.mark {
+  color: var(--wc-lime);
+  opacity: 0.85;
+}
+
+.copy {
+  max-width: 34ch;
+  font: var(--wc-t-body);
+  color: var(--wc-text-muted);
+}
+
+/*
+ * A signpost back to Today — deliberately NOT a start button. The one start
+ * control in the product lives on Today.
+ */
+.todayLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: var(--wc-s-2) var(--wc-s-5);
+  border: 1px solid var(--wc-line-strong);
+  border-radius: var(--wc-r-pill);
+  background: var(--wc-surface-2);
+  font: var(--wc-t-heading);
+  letter-spacing: -0.01em;
+  color: var(--wc-lime);
+  transition: background-color var(--wc-dur-fast) var(--wc-ease);
+}
+
+.todayLink:hover {
+  background: var(--wc-surface-3);
+}

@@ -1,0 +1,31 @@
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  height: 100%;
+  padding: var(--wc-s-4) var(--wc-s-3);
+  border: 1px solid var(--wc-line);
+  border-radius: var(--wc-r-lg);
+  background: var(--wc-surface);
+}
+
+.value {
+  font: 700 clamp(22px, 6vw, 28px) / 1.1 var(--wc-font-num);
+  font-variant-numeric: tabular-nums;
+  color: var(--wc-text);
+}
+
+.label {
+  font: var(--wc-t-small);
+  color: var(--wc-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.footnote {
+  margin-top: 2px;
+  font: var(--wc-t-label);
+  letter-spacing: 0.02em;
+  color: var(--wc-text-faint);
+  overflow-wrap: anywhere;
+}

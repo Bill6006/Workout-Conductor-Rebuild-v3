@@ -1,0 +1,30 @@
+.notice {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-2);
+  min-width: 0;
+  padding: var(--wc-s-4) var(--wc-s-5);
+  border: 1px solid var(--wc-lime-edge);
+  border-radius: var(--wc-r-lg);
+  background: var(--wc-lime-wash);
+}
+
+.top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--wc-s-2);
+  min-width: 0;
+}
+
+.heading {
+  font: var(--wc-t-heading);
+  color: var(--wc-text);
+  overflow-wrap: anywhere;
+}
+
+.copy {
+  font: var(--wc-t-small);
+  color: var(--wc-text-soft);
+}

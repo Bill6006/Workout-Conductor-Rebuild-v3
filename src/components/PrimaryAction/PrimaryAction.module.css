@@ -1,0 +1,50 @@
+.action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--wc-s-2);
+  width: 100%;
+  min-height: 50px;
+  padding: var(--wc-s-3) var(--wc-s-5);
+  border-radius: var(--wc-r-pill);
+  font: var(--wc-t-heading);
+  letter-spacing: -0.01em;
+  text-align: center;
+  transition:
+    transform var(--wc-dur-fast) var(--wc-ease),
+    background-color var(--wc-dur-fast) var(--wc-ease),
+    opacity var(--wc-dur-fast) var(--wc-ease);
+}
+
+.primary {
+  background: var(--wc-lime);
+  color: var(--wc-lime-ink);
+  box-shadow: var(--wc-shadow-lime);
+}
+
+.ghost {
+  border: 1px solid var(--wc-line-strong);
+  background: var(--wc-surface-2);
+  color: var(--wc-text);
+}
+
+.action:not(:disabled):active {
+  transform: scale(0.985);
+}
+
+.primary:not(:disabled):hover {
+  background: var(--wc-lime-bright);
+}
+
+.ghost:not(:disabled):hover {
+  background: var(--wc-surface-3);
+}
+
+/* Inactive placeholders must never read as a live lime CTA. */
+.action:disabled {
+  cursor: not-allowed;
+  box-shadow: none;
+  border: 1px solid var(--wc-line);
+  background: var(--wc-surface-2);
+  color: var(--wc-text-faint);
+}

@@ -1,0 +1,65 @@
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-6);
+  min-width: 0;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-3);
+  min-width: 0;
+}
+
+.copy {
+  font: var(--wc-t-small);
+  color: var(--wc-text-soft);
+}
+
+.lengthRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--wc-s-2);
+  min-width: 0;
+  padding-top: var(--wc-s-1);
+}
+
+.lengthLabel {
+  font: var(--wc-t-body);
+  color: var(--wc-text);
+}
+
+/* Static placeholder for the Phase 3 duration dropdown. */
+.lengthControl {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--wc-s-2);
+  min-height: 44px;
+  min-width: 0;
+  padding: var(--wc-s-2) var(--wc-s-4);
+  border: 1px solid var(--wc-line);
+  border-radius: var(--wc-r-pill);
+  background: var(--wc-surface-2);
+  color: var(--wc-text-faint);
+  font: var(--wc-t-body);
+  cursor: not-allowed;
+}
+
+.caption {
+  font: var(--wc-t-small);
+  color: var(--wc-text-muted);
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--wc-s-2);
+  min-width: 0;
+}
+
+.stats > li {
+  min-width: 0;
+}

@@ -1,0 +1,38 @@
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-6);
+  min-width: 0;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-3);
+  min-width: 0;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--wc-s-2);
+  min-width: 0;
+}
+
+.stats > li {
+  min-width: 0;
+}
+
+.chart {
+  min-height: 148px;
+  border: 1px solid var(--wc-line);
+  border-radius: var(--wc-r-md);
+  background-color: var(--wc-bg-elevated);
+  background-image: repeating-linear-gradient(to top, var(--wc-line) 0 1px, transparent 1px 36px);
+}
+
+.chartCaption {
+  font: var(--wc-t-small);
+  color: var(--wc-text-faint);
+  text-align: center;
+}

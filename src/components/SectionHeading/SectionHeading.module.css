@@ -1,0 +1,46 @@
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  /*
+   * `center`, not `baseline`: the action is a 44px touch target, and baseline
+   * alignment would hang the whole row off the link's text baseline.
+   */
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--wc-s-2);
+  min-width: 0;
+}
+
+.title {
+  font: var(--wc-t-heading);
+  color: var(--wc-text);
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+}
+
+/*
+ * The action is a real tap target, not decoration: 44px minimum on both axes.
+ * The padding is pulled back out with a negative inline end margin so the label
+ * still sits flush with the right edge of the section, and the block padding is
+ * absorbed by `gap` rather than growing the row — the heading stays compact.
+ */
+.action {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-inline-end: calc(var(--wc-s-3) * -1);
+  font: var(--wc-t-small);
+  color: var(--wc-lime);
+}
+
+/* The tappable thing is the link itself, so it fills the target, not just its box. */
+.action > :any-link,
+.action > button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  min-width: 44px;
+  padding-inline: var(--wc-s-3);
+  color: inherit;
+}

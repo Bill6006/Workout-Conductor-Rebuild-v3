@@ -1,0 +1,10 @@
+.stamp {
+  /* Pushed to the foot of the shell's flex column on short screens. */
+  margin-top: auto;
+  padding-top: var(--wc-s-2);
+  font: var(--wc-t-label);
+  letter-spacing: 0.04em;
+  color: var(--wc-text-faint);
+  text-align: center;
+  overflow-wrap: anywhere;
+}

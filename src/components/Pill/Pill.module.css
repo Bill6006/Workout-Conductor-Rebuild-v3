@@ -1,0 +1,30 @@
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--wc-s-1);
+  padding: 4px 10px;
+  border: 1px solid transparent;
+  border-radius: var(--wc-r-pill);
+  font: var(--wc-t-label);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.neutral {
+  border-color: var(--wc-line-strong);
+  background: var(--wc-surface-2);
+  color: var(--wc-text-soft);
+}
+
+.accent {
+  border-color: var(--wc-lime-edge);
+  background: var(--wc-lime-wash);
+  color: var(--wc-lime);
+}
+
+.muted {
+  border-color: var(--wc-line);
+  background: transparent;
+  color: var(--wc-text-muted);
+}
