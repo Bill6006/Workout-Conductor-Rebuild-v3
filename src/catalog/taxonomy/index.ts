@@ -1,0 +1,71 @@
+export {
+  JOINT_IDS,
+  JOINT_STRESS_TAG_IDS,
+  STRESS_INTENSITIES,
+  STRESS_WEIGHTS,
+  jointIdSchema,
+  jointStressLoad,
+  jointStressTagIdSchema,
+  jointStressTagSchema,
+  stressIntensitySchema,
+  stressRank,
+  tagForJoint,
+} from './joints'
+export type { JointId, JointStressTag, JointStressTagId, StressIntensity } from './joints'
+
+export {
+  DIFFICULTY_SCALE,
+  GRIP_DEMAND_SCALE,
+  STABILITY_DEMAND_SCALE,
+  SUITABILITY_SCALE,
+  TRANSITION_COST_SCALE,
+  WARM_UP_SUITABILITY_SCALE,
+  orderedScale,
+} from './scales'
+export type {
+  Difficulty,
+  GripDemand,
+  OrderedScale,
+  StabilityDemand,
+  Suitability,
+  TransitionCost,
+  WarmUpSuitability,
+} from './scales'
+
+export {
+  COMPETING_DEMANDS,
+  KNOWN_PROGRESSION_FAMILIES,
+  LIMITATION_FLAGS,
+  LOAD_BASES,
+  LOAD_MEASURES,
+  LOCATION_SUITABILITIES,
+  REP_UNITS,
+  STATION_IDS,
+  TRAINING_ROLES,
+  competingDemandSchema,
+  isAnchorRole,
+  isKnownProgressionFamily,
+  limitationFlagSchema,
+  loadBasisSchema,
+  loadMeasureSchema,
+  loadModelSchema,
+  locationSuitabilitySchema,
+  progressionCarriesAcross,
+  progressionFamilySchema,
+  repUnitSchema,
+  stationIdSchema,
+  trainingRoleSchema,
+} from './taxonomy'
+export type {
+  CompetingDemand,
+  KnownProgressionFamily,
+  LimitationFlag,
+  LoadBasis,
+  LoadMeasure,
+  LoadModel,
+  LocationSuitability,
+  ProgressionFamilyId,
+  RepUnit,
+  StationId,
+  TrainingRole,
+} from './taxonomy'

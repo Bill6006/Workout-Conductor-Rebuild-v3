@@ -1,0 +1,59 @@
+/*
+ * The inline summary setup shows for one preference list. Deliberately plain:
+ * it reports, and the picker sheet edits. Two places that both edit the same
+ * list is how the two drift.
+ */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--wc-s-3);
+  min-width: 0;
+}
+
+.list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--wc-s-2);
+  min-width: 0;
+}
+
+.entry {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--wc-s-2);
+  max-width: 100%;
+  min-width: 0;
+  padding: var(--wc-s-2) var(--wc-s-3);
+  border: 1px solid var(--wc-line-strong);
+  border-radius: var(--wc-r-pill);
+  background: var(--wc-surface-2);
+}
+
+.entryText {
+  min-width: 0;
+  font: var(--wc-t-small);
+  color: var(--wc-text-soft);
+  overflow-wrap: anywhere;
+}
+
+/*
+ * The marker on an entry the catalog could not match. It is a label, not a
+ * warning colour: what somebody typed is a valid answer, not an error.
+ */
+.ownTag {
+  flex: none;
+  padding: 0 var(--wc-s-2);
+  border-radius: var(--wc-r-pill);
+  background: var(--wc-surface-3);
+  color: var(--wc-text-muted);
+  font: var(--wc-t-label);
+  text-transform: lowercase;
+}
+
+.empty {
+  font: var(--wc-t-small);
+  color: var(--wc-text-faint);
+  overflow-wrap: anywhere;
+}

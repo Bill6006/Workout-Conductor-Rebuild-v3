@@ -1,4 +1,5 @@
 export * from './db'
+export * from './exercisePreferencesMigration'
 export * from './migrations'
 export * from './profileRepository'
 export * from './settings'

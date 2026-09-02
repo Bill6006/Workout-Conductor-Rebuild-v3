@@ -18,12 +18,17 @@ in your browser, works offline, and installs to a phone home screen as a PWA.
 
 ## Status
 
-**Phase 1 — Product Foundation and First Useful Live Preview (awaiting review).**
+**Phase 2 — Exercise Catalog, Media, and Conflict Engine (awaiting review).**
 
 What exists today is a real early product: an eight-step setup, a durable local profile in
 IndexedDB with Zod validation and a verified write / read-back / compare save path, fully
 editable settings, location and equipment profiles, profile export and import with a preview
 before anything is applied, and a Today dashboard driven by your own answers.
+
+Phase 2 added the material the coach will reason with: a 127-exercise catalog with full
+structured metadata, a muscle and movement-pattern vocabulary, a conflict engine, and the
+alternative-ranking foundation. Exercise preferences are now picked from that catalog rather
+than typed.
 
 What does not exist yet is the training intelligence. There is no workout engine, so Start
 Workout is disabled and says so; the session shown on Today is a static, clearly labelled
@@ -106,8 +111,8 @@ before pushing; CI runs the same commands and a red CI run must never be papered
 Nine phases. Each one ends at a review gate.
 
 - [x] **Phase 0 — Repository, Live Pages, and Scaffold** — GREEN, 2026-09-01
-- [~] **Phase 1 — Product Foundation and First Useful Live Preview** — in review
-- [ ] **Phase 2 — Exercise Catalog, Media, and Conflict Engine**
+- [x] **Phase 1 — Product Foundation and First Useful Live Preview** — GREEN, 2026-09-01
+- [~] **Phase 2 — Exercise Catalog, Media, and Conflict Engine** — in review
 - [ ] **Phase 3 — Workout Generation and Duration Engine**
 - [ ] **Phase 4 — Central Recalibration Engine**
 - [ ] **Phase 5 — Active Workout, Logging, and Superset Experience**

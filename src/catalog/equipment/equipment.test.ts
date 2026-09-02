@@ -12,8 +12,43 @@ import {
 } from './equipment'
 
 describe('EQUIPMENT', () => {
-  it('covers the Phase 1 seed', () => {
+  it('covers the Phase 1 seed and the Phase 2 catalog additions', () => {
     expect(EQUIPMENT_IDS).toEqual([
+      'barbell',
+      'ez-bar',
+      'trap-bar',
+      'dumbbells',
+      'adjustable-dumbbells',
+      'kettlebell',
+      'weight-plates',
+      'flat-bench',
+      'adjustable-bench',
+      'preacher-bench',
+      'back-extension-bench',
+      'squat-rack',
+      'smith-machine',
+      'landmine',
+      'cable-machine',
+      'lat-pulldown',
+      'leg-press',
+      'selectorised-machines',
+      'pull-up-bar',
+      'dip-bars',
+      'suspension-trainer',
+      'resistance-bands',
+      'ab-wheel',
+      'plyo-box',
+      'bodyweight-only',
+    ])
+  })
+
+  /**
+   * Ids are written into saved locations. Phase 2 may append, but every id a
+   * Phase 1 profile could already contain has to still be there and still mean
+   * the same thing.
+   */
+  it('keeps every Phase 1 id, in its original relative order', () => {
+    const phaseOne = [
       'barbell',
       'ez-bar',
       'dumbbells',
@@ -31,7 +66,12 @@ describe('EQUIPMENT', () => {
       'dip-bars',
       'resistance-bands',
       'bodyweight-only',
-    ])
+    ]
+    expect(EQUIPMENT_IDS.filter((id) => phaseOne.includes(id))).toEqual(phaseOne)
+  })
+
+  it('leaves the bodyweight-only constraint last, whatever is appended', () => {
+    expect(EQUIPMENT_IDS[EQUIPMENT_IDS.length - 1]).toBe('bodyweight-only')
   })
 
   it('lists one item per id, in the same order', () => {

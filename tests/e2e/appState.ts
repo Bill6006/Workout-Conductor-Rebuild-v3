@@ -34,28 +34,42 @@ export const DB_VERSION = 1
 export const PROFILE_STORE = 'profile'
 export const META_STORE = 'meta'
 export const PROFILE_ID = 'primary'
+/** Mirrors `SCHEMA_VERSION` in src/core/validation/schemas.ts. */
+export const SCHEMA_VERSION = 2
 
 /** Fixed, so anything asserted about a seeded value is reproducible. */
 export const SEED_TIME = '2026-03-04T09:00:00.000Z'
 
-/** The canonical equipment ids, in catalogue order. */
+/**
+ * The canonical equipment ids, in catalogue order. Mirrors
+ * `src/catalog/equipment/equipment.ts`, which owns the list; the mirror exists so
+ * a seed written into IndexedDB from the browser needs no bundler.
+ */
 export const ALL_EQUIPMENT = [
   'barbell',
   'ez-bar',
+  'trap-bar',
   'dumbbells',
   'adjustable-dumbbells',
   'kettlebell',
+  'weight-plates',
   'flat-bench',
   'adjustable-bench',
+  'preacher-bench',
+  'back-extension-bench',
   'squat-rack',
   'smith-machine',
+  'landmine',
   'cable-machine',
   'lat-pulldown',
   'leg-press',
   'selectorised-machines',
   'pull-up-bar',
   'dip-bars',
+  'suspension-trainer',
   'resistance-bands',
+  'ab-wheel',
+  'plyo-box',
   'bodyweight-only',
 ] as const
 
@@ -64,11 +78,15 @@ export const HOME_EQUIPMENT = [
   'dumbbells',
   'adjustable-dumbbells',
   'kettlebell',
+  'weight-plates',
   'flat-bench',
   'adjustable-bench',
   'pull-up-bar',
   'dip-bars',
+  'suspension-trainer',
   'resistance-bands',
+  'ab-wheel',
+  'plyo-box',
   'bodyweight-only',
 ] as const
 
@@ -100,7 +118,10 @@ export interface SeedProfile {
     avoidBarbellSquat: boolean
     notes: string
   }
-  exercisePreferences: { preferred: string[]; disliked: string[] }
+  exercisePreferences: {
+    preferred: { exerciseIds: string[]; freeText: string[] }
+    disliked: { exerciseIds: string[]; freeText: string[] }
+  }
   locations: SeedLocation[]
   activeLocationId: string
   onboardingCompletedAt: string | null
@@ -117,7 +138,7 @@ export const SEED_DURATION_MIN = 60
  */
 export function seedProfile(overrides: Partial<SeedProfile> = {}): SeedProfile {
   return {
-    schemaVersion: 1,
+    schemaVersion: SCHEMA_VERSION,
     id: PROFILE_ID,
     createdAt: SEED_TIME,
     updatedAt: SEED_TIME,
@@ -134,7 +155,10 @@ export function seedProfile(overrides: Partial<SeedProfile> = {}): SeedProfile {
     units: 'imperial',
     bodyweight: null,
     limitations: { shoulder: false, knee: false, lowerBack: false, avoidBarbellSquat: false, notes: '' },
-    exercisePreferences: { preferred: [], disliked: [] },
+    exercisePreferences: {
+      preferred: { exerciseIds: [], freeText: [] },
+      disliked: { exerciseIds: [], freeText: [] },
+    },
     locations: [
       {
         id: 'loc-gym',

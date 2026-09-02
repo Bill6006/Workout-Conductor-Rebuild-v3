@@ -3,6 +3,7 @@ import { Card } from '../../components/Card'
 import { equipmentLabel } from '../../catalog/equipment'
 import {
   daysSummary,
+  exercisePreferenceNames,
   experienceLabel,
   goalLabel,
   locationKindLabel,
@@ -10,6 +11,7 @@ import {
   trainingStyleLabel,
   weightUnitFor,
 } from '../../catalog/labels'
+import { exercisePreferenceCount } from '../../core/validation'
 import type { OnboardingAnswers } from './answers'
 import type { OnboardingStepId } from './steps'
 import styles from './OnboardingSteps.module.css'
@@ -179,13 +181,13 @@ export function ReviewStep({ answers, onEdit }: ReviewStepProps) {
           },
           {
             term: 'Likes',
-            value: list(exercisePreferences.preferred, 'None listed'),
-            empty: exercisePreferences.preferred.length === 0,
+            value: list(exercisePreferenceNames(exercisePreferences.preferred), 'None listed'),
+            empty: exercisePreferenceCount(exercisePreferences.preferred) === 0,
           },
           {
             term: 'Skips',
-            value: list(exercisePreferences.disliked, 'None listed'),
-            empty: exercisePreferences.disliked.length === 0,
+            value: list(exercisePreferenceNames(exercisePreferences.disliked), 'None listed'),
+            empty: exercisePreferenceCount(exercisePreferences.disliked) === 0,
           },
         ]}
       />

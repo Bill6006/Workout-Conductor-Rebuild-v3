@@ -9,7 +9,9 @@ import {
   type Migration,
 } from './migrations'
 import { SCHEMA_VERSION, createDefaultProfile } from '../validation/schemas'
-import { parseProfile } from '../validation/validate'
+import { formatIssues, parseProfile } from '../validation/validate'
+import { createExerciseNameResolver } from '../../catalog/exercises/exerciseSchema'
+import { normaliseExerciseName } from '../../catalog/exercises/exerciseId'
 
 const NOW = '2026-09-01T12:00:00.000Z'
 
@@ -29,9 +31,41 @@ const twoToThree: Migration = {
   migrate: (record) => ({ ...record, rest: record.restDefaults }),
 }
 
+/**
+ * A real version-1 profile, written out rather than derived from
+ * `createDefaultProfile`, because that function now produces version 2. This is
+ * the shape a Phase 1 build actually saved, and it is the shape the migration has
+ * to be able to read for as long as anyone still has one.
+ */
+function versionOneProfile(overrides: Record<string, unknown> = {}): Record<string, unknown> {
+  const current = createDefaultProfile(NOW)
+  return {
+    ...(JSON.parse(JSON.stringify(current)) as Record<string, unknown>),
+    schemaVersion: 1,
+    exercisePreferences: { preferred: [], disliked: [] },
+    ...overrides,
+  }
+}
+
+const CATALOG = [
+  { id: 'romanian-deadlift', name: 'Romanian deadlift', aliases: ['RDL'] },
+  { id: 'barbell-back-squat', name: 'Barbell back squat', aliases: ['Back squat'] },
+]
+
+const resolveExerciseId = createExerciseNameResolver(CATALOG, normaliseExerciseName)
+
 describe('PROFILE_MIGRATIONS', () => {
-  it('is empty at the version 1 baseline', () => {
-    expect(PROFILE_MIGRATIONS).toEqual([])
+  it('registers one unbroken chain of steps up to the current version', () => {
+    expect(PROFILE_MIGRATIONS.map((step) => [step.from, step.to])).toEqual([[1, 2]])
+
+    let version = 1
+    for (const step of PROFILE_MIGRATIONS) {
+      expect(step.from).toBe(version)
+      expect(step.to).toBe(version + 1)
+      expect(step.description).not.toBe('')
+      version = step.to
+    }
+    expect(version).toBe(SCHEMA_VERSION)
   })
 
   it('leaves a current record untouched', () => {
@@ -190,5 +224,121 @@ describe('migrateRecord', () => {
     const input = { schemaVersion: 1, name: 'x' }
     migrateRecord(input, [oneToTwo], 2)
     expect(input).toEqual({ schemaVersion: 1, name: 'x' })
+  })
+})
+
+describe('the version 1 to 2 step: catalog-backed exercise preferences', () => {
+  it('brings a real version 1 profile up to date, and the result validates', () => {
+    const result = migrateProfileRecord(versionOneProfile(), { resolveExerciseId })
+
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    expect(result.fromVersion).toBe(1)
+    expect(result.toVersion).toBe(SCHEMA_VERSION)
+    expect(result.applied).toHaveLength(1)
+    expect(result.value.schemaVersion).toBe(SCHEMA_VERSION)
+    expect(result.value.exercisePreferences).toEqual({
+      preferred: { exerciseIds: [], freeText: [] },
+      disliked: { exerciseIds: [], freeText: [] },
+    })
+
+    const validated = parseProfile(result.value)
+    expect(validated.ok, validated.ok ? '' : formatIssues(validated.issues)).toBe(true)
+  })
+
+  it('resolves what the injected lookup recognises and keeps the rest verbatim', () => {
+    const record = versionOneProfile({
+      exercisePreferences: {
+        preferred: ['RDL', 'that machine by the window'],
+        disliked: ['BACK  squat!', 'Burpees'],
+      },
+    })
+
+    const result = migrateProfileRecord(record, { resolveExerciseId })
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+
+    expect(result.value.exercisePreferences).toEqual({
+      preferred: { exerciseIds: ['romanian-deadlift'], freeText: ['that machine by the window'] },
+      disliked: { exerciseIds: ['barbell-back-squat'], freeText: ['Burpees'] },
+    })
+    expect(parseProfile(result.value).ok).toBe(true)
+  })
+
+  it('loses nothing when no lookup is injected — every entry stays as typed', () => {
+    const record = versionOneProfile({
+      exercisePreferences: { preferred: ['RDL', 'Back squat'], disliked: [] },
+    })
+
+    const result = migrateProfileRecord(record)
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+
+    expect(result.value.exercisePreferences).toEqual({
+      preferred: { exerciseIds: [], freeText: ['RDL', 'Back squat'] },
+      disliked: { exerciseIds: [], freeText: [] },
+    })
+    expect(parseProfile(result.value).ok).toBe(true)
+  })
+
+  it('carries an unknown field written by a future build across the migration', () => {
+    const record = versionOneProfile({
+      exercisePreferences: { preferred: ['RDL'], disliked: [] },
+      coachingTone: 'blunt',
+      locations: [
+        {
+          id: 'loc-gym',
+          name: 'Gym',
+          kind: 'gym',
+          equipment: ['barbell'],
+          notes: '',
+          floorNumber: 2,
+        },
+      ],
+      activeLocationId: 'loc-gym',
+    })
+
+    const result = migrateProfileRecord(record, { resolveExerciseId })
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+
+    expect(result.value.coachingTone).toBe('blunt')
+    expect((result.value.locations as { floorNumber: number }[])[0].floorNumber).toBe(2)
+    expect(parseProfile(result.value).ok).toBe(true)
+  })
+
+  it('is a no-op when it runs again on its own output', () => {
+    const record = versionOneProfile({
+      exercisePreferences: { preferred: ['RDL', 'Weird machine'], disliked: ['Burpees'] },
+    })
+
+    const once = migrateProfileRecord(record, { resolveExerciseId })
+    expect(once.ok).toBe(true)
+    if (!once.ok) return
+
+    const twice = migrateProfileRecord(once.value, { resolveExerciseId })
+    expect(twice.ok).toBe(true)
+    if (!twice.ok) return
+
+    expect(twice.applied).toEqual([])
+    expect(twice.value).toEqual(once.value)
+  })
+
+  it('collapses duplicates and keeps every distinct thing the user typed', () => {
+    const record = versionOneProfile({
+      exercisePreferences: {
+        preferred: ['RDL', 'Romanian deadlift', 'Weird machine', 'Weird machine'],
+        disliked: [],
+      },
+    })
+
+    const result = migrateProfileRecord(record, { resolveExerciseId })
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+
+    expect(result.value.exercisePreferences).toEqual({
+      preferred: { exerciseIds: ['romanian-deadlift'], freeText: ['Weird machine'] },
+      disliked: { exerciseIds: [], freeText: [] },
+    })
   })
 })

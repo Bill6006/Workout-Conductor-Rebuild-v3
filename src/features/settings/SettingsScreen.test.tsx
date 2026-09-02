@@ -3,7 +3,7 @@ import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { BUILD_INFO, formatBuildStamp } from '../../app/buildInfo'
 import { DROP_WRITE } from '../../core/storage/memoryStore'
-import { renderSettings } from './settingsTestHarness'
+import { makeProfile, renderSettings } from './settingsTestHarness'
 
 /** Opens a settings row by its accessible name and hands back the user session. */
 async function openRow(name: RegExp) {
@@ -138,18 +138,83 @@ describe('SettingsScreen', () => {
     expect(harness.stored()?.schedule.availableDays).toEqual(['mon', 'tue', 'thu', 'sat'])
   })
 
-  it('edits the free-text exercise preferences', async () => {
+  it('records a catalog exercise chosen from the picker', async () => {
     const harness = renderSettings()
     const user = await openRow(/Preferred exercises None listed/)
 
-    await user.type(screen.getByRole('textbox', { name: 'Preferred exercise' }), 'Incline dumbbell press')
-    await user.click(screen.getByRole('button', { name: 'Add Preferred exercise' }))
+    // The catalog is a lazy chunk: it arrives after the sheet is already up, so
+    // the first assertion is that the sheet waited calmly rather than blocking.
+    await user.type(await screen.findByRole('searchbox', { name: 'Search exercises' }), 'incline dumbbell')
+    await user.click(await screen.findByRole('button', { name: /^Incline dumbbell press/ }))
     await user.click(screen.getByRole('button', { name: 'Save' }))
 
     await waitFor(() =>
-      expect(harness.stored()?.exercisePreferences.preferred).toEqual(['Incline dumbbell press']),
+      expect(harness.stored()?.exercisePreferences.preferred).toEqual({
+        exerciseIds: ['incline-dumbbell-press'],
+        freeText: [],
+      }),
     )
-    expect(harness.stored()?.exercisePreferences.disliked).toEqual([])
+    // The row reads the catalog's own name, not the raw id.
+    expect(
+      await screen.findByRole('button', { name: /Preferred exercises Incline dumbbell press/ }),
+    ).toBeInTheDocument()
+  })
+
+  it('keeps words the catalog cannot match, rather than guessing at them', async () => {
+    const harness = renderSettings()
+    const user = await openRow(/Preferred exercises None listed/)
+
+    await user.type(await screen.findByRole('searchbox', { name: 'Search exercises' }), 'my gym class')
+    await user.click(await screen.findByRole('button', { name: /Keep .my gym class. in your own words/ }))
+    await user.click(screen.getByRole('button', { name: 'Save' }))
+
+    await waitFor(() =>
+      expect(harness.stored()?.exercisePreferences.preferred).toEqual({
+        exerciseIds: [],
+        freeText: ['my gym class'],
+      }),
+    )
+  })
+
+  it('shows free text carried over by the migration, and can swap it for a real exercise', async () => {
+    // Exactly what a Phase 1 profile looks like after the v1 -> v2 migration:
+    // everything the person typed, kept verbatim, with no ids guessed for them.
+    const harness = renderSettings(
+      makeProfile({
+        exercisePreferences: {
+          preferred: { exerciseIds: [], freeText: ['Front squat', 'whatever my coach calls it'] },
+          disliked: { exerciseIds: [], freeText: [] },
+        },
+      }),
+    )
+    const user = await openRow(/Preferred exercises Front squat, whatever my coach calls it/)
+
+    // Both entries are visible in full — neither is hidden behind a count.
+    expect(await screen.findByText('Front squat')).toBeInTheDocument()
+    expect(screen.getByText('whatever my coach calls it')).toBeInTheDocument()
+
+    await user.click(await screen.findByRole('button', { name: 'Find a match for Front squat' }))
+    await user.click(await screen.findByRole('button', { name: /^Barbell front squat/ }))
+    await user.click(screen.getByRole('button', { name: 'Save' }))
+
+    await waitFor(() =>
+      expect(harness.stored()?.exercisePreferences.preferred).toEqual({
+        exerciseIds: ['barbell-front-squat'],
+        // The entry the person did not replace is still theirs, untouched.
+        freeText: ['whatever my coach calls it'],
+      }),
+    )
+  })
+
+  it('leaves the stored lists alone when the sheet is cancelled', async () => {
+    const harness = renderSettings()
+    const user = await openRow(/Preferred exercises None listed/)
+
+    await user.type(await screen.findByRole('searchbox', { name: 'Search exercises' }), 'push up')
+    await user.click(await screen.findByRole('button', { name: /^Push-up/ }))
+    await user.click(screen.getByRole('button', { name: 'Cancel' }))
+
+    expect(harness.stored()?.exercisePreferences.preferred).toEqual({ exerciseIds: [], freeText: [] })
   })
 
   it('re-enters setup by clearing the completion stamp', async () => {

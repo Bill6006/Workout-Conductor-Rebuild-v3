@@ -1,7 +1,9 @@
 import { WEEK_DAYS } from '../../components/DayPicker'
 import { equipmentLabel, sortEquipmentIds } from '../equipment'
+import { humaniseExerciseId } from '../exercises/exerciseId'
 import {
   WEEKDAYS,
+  type ExercisePreferenceList,
   type Experience,
   type Goal,
   type LocationKind,
@@ -215,6 +217,24 @@ export function listSummary(entries: readonly string[], empty: string): string {
   if (entries.length === 0) return empty
   if (entries.length <= 2) return entries.join(', ')
   return `${entries.slice(0, 2).join(', ')} +${entries.length - 2} more`
+}
+
+/**
+ * One side of the exercise preferences as names a person reads: the resolved
+ * exercises first, then the words they typed that nothing matched, verbatim.
+ *
+ * `nameOf` is how a screen that has the catalog loaded supplies real names. Every
+ * screen that reads a profile today has NOT — the catalog is a lazy chunk — so the
+ * fallback humanises the id (`incline-dumbbell-press` reads as
+ * `Incline dumbbell press`). That is a display fallback and never a stored value:
+ * the id is what is saved, whatever this renders.
+ */
+export function exercisePreferenceNames(
+  list: ExercisePreferenceList,
+  nameOf?: (id: string) => string | null,
+): string[] {
+  const named = list.exerciseIds.map((id) => nameOf?.(id) ?? humaniseExerciseId(id))
+  return [...named, ...list.freeText]
 }
 
 /** Equipment names in canonical order, ready to render as chips or a sentence. */

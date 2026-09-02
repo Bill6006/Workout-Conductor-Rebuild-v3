@@ -61,20 +61,47 @@ test('an edited value survives a full page reload', async ({ page }) => {
   await expect(page.getByTestId('today-facts')).toContainText('75 min')
 })
 
-test('an edited list value survives a reload too', async ({ page }) => {
+test('an exercise chosen from the picker survives a reload too', async ({ page }) => {
   await page.goto('./#/settings')
 
   await row(page, 'Preferred exercises').click()
   const sheet = page.getByRole('dialog', { name: 'Preferred exercises' })
-  await sheet.getByRole('textbox', { name: 'Preferred exercise' }).fill('Romanian deadlift')
-  await sheet.getByRole('button', { name: 'Add Preferred exercise', exact: true }).click()
+  // The catalog is a lazy chunk. It arrives after the sheet is open, so the
+  // search field is filled once the results it drives are actually there.
+  await sheet.getByRole('searchbox', { name: 'Search exercises' }).fill('romanian deadlift')
+  await sheet.getByRole('button', { name: /^Barbell Romanian deadlift/ }).click()
   await sheet.getByRole('button', { name: 'Save', exact: true }).click()
 
   await expect(page.getByText('Preferred exercises saved.')).toBeVisible()
   await page.reload()
 
-  await expect(row(page, 'Preferred exercises')).toContainText('Romanian deadlift')
-  expect((await readStoredProfile(page))?.exercisePreferences.preferred).toEqual(['Romanian deadlift'])
+  await expect(row(page, 'Preferred exercises')).toContainText('Barbell Romanian deadlift')
+  expect((await readStoredProfile(page))?.exercisePreferences.preferred).toEqual({
+    exerciseIds: ['barbell-romanian-deadlift'],
+    freeText: [],
+  })
+})
+
+test('free text the catalog could not match stays visible and replaceable', async ({ page }) => {
+  await page.goto('./#/settings')
+
+  await row(page, 'Preferred exercises').click()
+  const sheet = page.getByRole('dialog', { name: 'Preferred exercises' })
+  await sheet.getByRole('searchbox', { name: 'Search exercises' }).fill('the wobbly one')
+  await sheet.getByRole('button', { name: /in your own words/ }).click()
+  await sheet.getByRole('button', { name: 'Save', exact: true }).click()
+
+  await expect(page.getByText('Preferred exercises saved.')).toBeVisible()
+  expect((await readStoredProfile(page))?.exercisePreferences.preferred).toEqual({
+    exerciseIds: [],
+    freeText: ['the wobbly one'],
+  })
+
+  // Reopening shows the words back, verbatim, with a way to swap them for a
+  // catalog exercise — never folded away into a count.
+  await row(page, 'Preferred exercises').click()
+  await expect(sheet.getByText('the wobbly one', { exact: true })).toBeVisible()
+  await expect(sheet.getByRole('button', { name: 'Find a match for the wobbly one' })).toBeVisible()
 })
 
 test('re-running setup reopens setup without wiping the profile', async ({ page }) => {

@@ -4,7 +4,6 @@ import { ChoiceCard, ChoiceCardGroup } from '../../components/ChoiceCard'
 import { DayPicker } from '../../components/DayPicker'
 import { FormField } from '../../components/FormField'
 import { NumberStepper } from '../../components/NumberStepper'
-import { TextListInput } from '../../components/TextListInput'
 import { ToggleRow } from '../../components/ToggleRow'
 import {
   EXPERIENCE_LABELS,
@@ -14,6 +13,7 @@ import {
   UNITS_LABELS,
   bodyweightSummary,
   daysSummary,
+  exercisePreferenceNames,
   experienceLabel,
   goalLabel,
   limitationsSummary,
@@ -28,7 +28,8 @@ import {
 } from '../../catalog/labels'
 import { useProfile } from '../../core/state'
 import type { SaveResult } from '../../core/storage/verifiedSave'
-import type { Goal, Profile, Weekday } from '../../core/validation/schemas'
+import type { ExercisePreferenceList, Goal, Profile, Weekday } from '../../core/validation/schemas'
+import { ExercisePicker, useExerciseCatalog } from '../exercisePreferences'
 import { EditRow } from './EditRow'
 import { EditSheet } from './EditSheet'
 import styles from './ProfileSettings.module.css'
@@ -146,6 +147,22 @@ export function ProfileSettings({ profile, onSaved }: ProfileSettingsProps) {
   const [dialog, setDialog] = useState<Dialog>('none')
   const close = () => setDialog('none')
 
+  /**
+   * The catalog is a lazy chunk, so this screen only asks for it when it has
+   * something to spend it on: the picker being open, or saved exercise ids that
+   * need real names. The humanised-id fallback cannot recover a proper noun —
+   * `barbell-romanian-deadlift` humanises to "Barbell romanian deadlift" — so a
+   * row with ids in it would otherwise show a subtly wrong name until the user
+   * happened to open the picker. A profile with no saved ids still costs nothing.
+   * Either way the row shows the person's own free text verbatim.
+   */
+  const editingPreferences = dialog === 'preferred' || dialog === 'disliked'
+  const hasSavedExerciseIds =
+    profile.exercisePreferences.preferred.exerciseIds.length > 0 ||
+    profile.exercisePreferences.disliked.exerciseIds.length > 0
+  const { catalog } = useExerciseCatalog(editingPreferences || hasSavedExerciseIds)
+  const nameOf = catalog ? (id: string) => catalog.exerciseNameOf(id) : undefined
+
   const bodyweightUnit = profile.bodyweight?.unit ?? weightUnitFor(profile.units)
 
   return (
@@ -219,12 +236,18 @@ export function ProfileSettings({ profile, onSaved }: ProfileSettingsProps) {
         <div className={styles.rows}>
           <EditRow
             label="Preferred exercises"
-            value={listSummary(profile.exercisePreferences.preferred, 'None listed')}
+            value={listSummary(
+              exercisePreferenceNames(profile.exercisePreferences.preferred, nameOf),
+              'None listed',
+            )}
             onEdit={() => setDialog('preferred')}
           />
           <EditRow
             label="Exercises to avoid"
-            value={listSummary(profile.exercisePreferences.disliked, 'None listed')}
+            value={listSummary(
+              exercisePreferenceNames(profile.exercisePreferences.disliked, nameOf),
+              'None listed',
+            )}
             onEdit={() => setDialog('disliked')}
           />
         </div>
@@ -370,11 +393,10 @@ export function ProfileSettings({ profile, onSaved }: ProfileSettingsProps) {
       )}
 
       {dialog === 'preferred' && (
-        <ListSheet
+        <PreferenceSheet
           title="Preferred exercises"
-          description="Movements you want to see more often. Free text for now — Phase 2 replaces this with the exercise catalogue."
-          label="Preferred exercise"
-          placeholder="e.g. Incline dumbbell press"
+          description="Movements you want to see more often."
+          noun="preferred exercise"
           current={profile.exercisePreferences.preferred}
           onPick={(preferred) => updateProfile({ exercisePreferences: { preferred } })}
           onSaved={() => onSaved('Preferred exercises saved.')}
@@ -383,11 +405,10 @@ export function ProfileSettings({ profile, onSaved }: ProfileSettingsProps) {
       )}
 
       {dialog === 'disliked' && (
-        <ListSheet
+        <PreferenceSheet
           title="Exercises to avoid"
-          description="Movements to keep out of your sessions. Free text for now — Phase 2 replaces this with the exercise catalogue."
-          label="Exercise to avoid"
-          placeholder="e.g. Barbell back squat"
+          description="Movements to keep out of your sessions."
+          noun="exercise to avoid"
           current={profile.exercisePreferences.disliked}
           onPick={(disliked) => updateProfile({ exercisePreferences: { disliked } })}
           onSaved={() => onSaved('Exercises to avoid saved.')}
@@ -543,11 +564,18 @@ function TechniquesSheet({
   )
 }
 
-function ListSheet({
+/**
+ * One preference list, drafted in the sheet and committed by one button — the
+ * same contract every other row on this screen keeps.
+ *
+ * The picker inside it is the one setup uses. There is no second exercise
+ * chooser and no second place to type a preference: a person who set these up
+ * during setup and a person editing them a month later are using the same thing.
+ */
+function PreferenceSheet({
   title,
   description,
-  label,
-  placeholder,
+  noun,
   current,
   onPick,
   onSaved,
@@ -555,34 +583,26 @@ function ListSheet({
 }: {
   title: string
   description: string
-  label: string
-  placeholder: string
-  current: readonly string[]
-  onPick: (entries: string[]) => Promise<SaveResult<Profile>>
+  noun: string
+  current: ExercisePreferenceList
+  onPick: (list: ExercisePreferenceList) => Promise<SaveResult<Profile>>
   onSaved: () => void
   onClose: () => void
 }) {
-  const [entries, setEntries] = useState<string[]>([...current])
+  const [draft, setDraft] = useState<ExercisePreferenceList>({
+    exerciseIds: [...current.exerciseIds],
+    freeText: [...current.freeText],
+  })
 
   return (
     <EditSheet
       title={title}
       description={description}
-      onSave={() => onPick(entries)}
+      onSave={() => onPick(draft)}
       onSaved={onSaved}
       onClose={onClose}
     >
-      <FormField label={label} as="group">
-        {(field) => (
-          <TextListInput
-            label={label}
-            value={entries}
-            onChange={setEntries}
-            placeholder={placeholder}
-            aria-labelledby={field.labelId}
-          />
-        )}
-      </FormField>
+      <ExercisePicker noun={noun} value={draft} onChange={setDraft} />
     </EditSheet>
   )
 }

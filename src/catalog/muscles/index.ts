@@ -1,0 +1,21 @@
+export {
+  BODY_REGIONS,
+  MUSCLES,
+  MUSCLE_GROUPS,
+  MUSCLE_GROUP_IDS,
+  MUSCLE_IDS,
+  bodyRegionSchema,
+  getMuscle,
+  getMuscleGroup,
+  isMuscleGroupId,
+  isMuscleId,
+  muscleGroupIdSchema,
+  muscleGroupOf,
+  muscleIdSchema,
+  musclesInGroup,
+  regionOfMuscle,
+  rollUpMuscles,
+  sharesMuscleGroup,
+  sortMuscleIds,
+} from './muscles'
+export type { BodyRegion, Muscle, MuscleGroup, MuscleGroupId, MuscleId } from './muscles'

@@ -71,8 +71,8 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          VITE_BUILD_MARKER: phase1-${{ github.run_number }}-${{ env.SHORT_SHA }}
-          VITE_BUILD_PHASE: 'Phase 1 - Product Foundation and First Useful Live Preview'
+          VITE_BUILD_MARKER: phase2-${{ github.run_number }}-${{ env.SHORT_SHA }}
+          VITE_BUILD_PHASE: 'Phase 2 - Exercise Catalog, Media, and Conflict Engine'
           VITE_BUILD_COMMIT: ${{ env.SHORT_SHA }}
           VITE_BUILD_TIME: ${{ env.BUILD_TIME }}
 
@@ -83,7 +83,7 @@ jobs:
         run: npm run verify:build
         env:
           # Must match the marker injected by the build step above, exactly.
-          VITE_BUILD_MARKER: phase1-${{ github.run_number }}-${{ env.SHORT_SHA }}
+          VITE_BUILD_MARKER: phase2-${{ github.run_number }}-${{ env.SHORT_SHA }}
 
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium

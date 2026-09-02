@@ -9,6 +9,15 @@ import { createProfileRepository, type ProfileRepository } from '../../core/stor
 import { fixedClock, setClock } from '../../core/time/clock'
 import { profileValidator } from '../../core/validation/validate'
 import { PROFILE_ID, createDefaultProfile, type Profile } from '../../core/validation/schemas'
+import { defaultEquipmentFor } from '../../catalog/equipment'
+
+/**
+ * The seeded item counts come from the equipment catalogue rather than a number
+ * typed here. The catalogue grows as the exercise catalog needs more kit, and a
+ * hand-written total would then fail on the growth instead of on the screen;
+ * what the catalogue holds is pinned exactly in `catalog/equipment/equipment.test.ts`.
+ */
+const GYM_ITEMS = defaultEquipmentFor('gym').length
 
 /**
  * Names that would signal a second, competing "how long / how hard" control.
@@ -144,7 +153,7 @@ describe('TodayScreen', () => {
       expect(tiles.getByText('4')).toBeInTheDocument()
       expect(tiles.getByText('in your week')).toBeInTheDocument()
       expect(tiles.getByText('Gym')).toBeInTheDocument()
-      expect(tiles.getByText('16 items')).toBeInTheDocument()
+      expect(tiles.getByText(`${GYM_ITEMS} items`)).toBeInTheDocument()
       expect(screen.queryByText('—')).not.toBeInTheDocument()
     })
   })

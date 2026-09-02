@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { createBackupEnvelope, serializeBackup } from '../../core/backup'
+import { SCHEMA_VERSION } from '../../core/validation'
 import { makeProfile, renderSettings } from './settingsTestHarness'
 
 /** jsdom has no blob URLs and no downloads, so both are stubbed and inspected. */
@@ -64,7 +65,7 @@ describe('SettingsScreen — export', () => {
 
     const written = JSON.parse(await readBlob(download.blobs[0]))
     expect(written.app).toBe('workout-conductor')
-    expect(written.schemaVersion).toBe(1)
+    expect(written.schemaVersion).toBe(SCHEMA_VERSION)
     expect(written.data.profile.goals.primary).toBe('build-muscle')
     expect(screen.getByText(/Export started/)).toBeInTheDocument()
   })
@@ -127,7 +128,9 @@ describe('SettingsScreen — import preview', () => {
     await choose(fileWith(text))
 
     const sheet = within(await screen.findByRole('dialog', { name: 'This file cannot be imported' }))
-    expect(sheet.getByText(/version 9 and this build understands version 1/)).toBeInTheDocument()
+    expect(
+      sheet.getByText(new RegExp(`version 9 and this build understands version ${SCHEMA_VERSION}`)),
+    ).toBeInTheDocument()
     expect(sheet.getByText(/Update the app, then import it/)).toBeInTheDocument()
     expect(sheet.queryByRole('button', { name: 'Replace my profile' })).not.toBeInTheDocument()
     expect(harness.stored()?.experience).toBe('intermediate')

@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { equipmentIdSchema, defaultEquipmentFor } from '../../catalog/equipment/equipment'
+import { MAX_EXERCISE_ID_LENGTH, isCatalogExerciseId } from '../../catalog/exercises/exerciseId'
 import { isIsoTimestamp } from '../time/clock'
 
 /**
@@ -16,7 +17,7 @@ import { isIsoTimestamp } from '../time/clock'
  * these to `z.object`: that silently strips a future user's data on the first save.
  */
 
-export const SCHEMA_VERSION = 1
+export const SCHEMA_VERSION = 2
 
 /**
  * Strips the `[key: string]: unknown` carry-through slot that `z.looseObject`
@@ -108,14 +109,56 @@ export const limitationsSchema = z.looseObject({
 })
 
 /**
- * Phase 1 has no exercise catalog, so these are free-text entries the user typed.
- * Phase 2 makes them catalog-backed by resolving each string to an exercise id and
- * widening this field in place — extend THIS field, do not add a parallel one.
+ * One side of the exercise preferences: what the catalog recognised, and what the
+ * person typed that it did not.
+ *
+ * TWO LISTS, NOT ONE, AND NEITHER IS A FALLBACK FOR THE OTHER.
+ *
+ *   `exerciseIds` — resolved, structural, and what the generator reads. An id
+ *                   survives a rename of the exercise's display name.
+ *   `freeText`    — the person's own words, kept verbatim. Phase 1 stored every
+ *                   entry this way because there was no catalog to resolve
+ *                   against; the v1 -> v2 migration promotes only what it can
+ *                   match with certainty and leaves the rest here, unedited.
+ *
+ * A single list of strings could not tell the two apart, so a generator would
+ * have to guess whether `bench-press` was an id or something a person typed, and
+ * a display would render one of them wrongly. Nothing is ever moved from
+ * `freeText` by inference — an entry leaves it only when a person picks the
+ * exercise it meant.
+ *
+ * `exerciseIds` accepts a built-in id or a `custom:`-prefixed one, so a user's own
+ * exercise is as referenceable as a shipped one.
  */
-export const exercisePreferencesSchema = z.looseObject({
-  preferred: z.array(z.string().min(1).max(80)).max(100),
-  disliked: z.array(z.string().min(1).max(80)).max(100),
+export const exercisePreferenceListSchema = z.looseObject({
+  exerciseIds: z
+    .array(
+      z
+        .string()
+        .min(1)
+        .max(MAX_EXERCISE_ID_LENGTH)
+        .refine(isCatalogExerciseId, { message: 'Expected a built-in or custom exercise id' }),
+    )
+    .max(100),
+  freeText: z.array(z.string().min(1).max(80)).max(100),
 })
+export type ExercisePreferenceList = KnownFields<z.infer<typeof exercisePreferenceListSchema>>
+
+export const exercisePreferencesSchema = z.looseObject({
+  preferred: exercisePreferenceListSchema,
+  disliked: exercisePreferenceListSchema,
+})
+export type ExercisePreferences = KnownFields<z.infer<typeof exercisePreferencesSchema>>
+
+/** An empty side. Written by `createDefaultProfile` and by the v1 -> v2 migration. */
+export function emptyExercisePreferenceList(): ExercisePreferenceList {
+  return { exerciseIds: [], freeText: [] }
+}
+
+/** How many entries a side holds, whichever list they landed in. */
+export function exercisePreferenceCount(list: ExercisePreferenceList): number {
+  return list.exerciseIds.length + list.freeText.length
+}
 
 export const profileShape = {
   schemaVersion: z.number().int().min(1),
@@ -181,7 +224,10 @@ export function createDefaultProfile(now: string): Profile {
     units: 'imperial',
     bodyweight: null,
     limitations: { shoulder: false, knee: false, lowerBack: false, avoidBarbellSquat: false, notes: '' },
-    exercisePreferences: { preferred: [], disliked: [] },
+    exercisePreferences: {
+      preferred: emptyExercisePreferenceList(),
+      disliked: emptyExercisePreferenceList(),
+    },
     locations: [
       createLocation('gym', 'Gym', DEFAULT_GYM_LOCATION_ID),
       createLocation('home', 'Home', DEFAULT_HOME_LOCATION_ID),

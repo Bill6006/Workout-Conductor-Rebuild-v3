@@ -80,8 +80,13 @@ test('walking every step and finishing lands on Today with the chosen answers', 
 
     if (step.name === 'Limits') {
       await page.getByRole('switch', { name: 'Knee trouble', exact: true }).click()
-      await page.getByRole('textbox', { name: 'Exercises you like' }).fill('Front squat')
-      await page.getByRole('button', { name: 'Add a liked exercise', exact: true }).click()
+      // Preferences are catalog-backed from Phase 2: the picker sheet is the one
+      // way in, and it writes an id only when the person taps the exercise.
+      await page.getByRole('button', { name: 'Choose liked exercises', exact: true }).click()
+      const picker = page.getByRole('dialog', { name: 'Exercises you like' })
+      await picker.getByRole('searchbox', { name: 'Search exercises' }).fill('front squat')
+      await picker.getByRole('button', { name: /^Barbell front squat/ }).click()
+      await picker.getByRole('button', { name: 'Done', exact: true }).click()
     }
 
     if (step.name === 'Review') {
@@ -92,7 +97,7 @@ test('walking every step and finishing lands on Today with the chosen answers', 
       await expect(review).toContainText('Advanced')
       await expect(review).toContainText('45 min')
       await expect(review).toContainText('Ironworks Gym')
-      await expect(review).toContainText('Front squat')
+      await expect(review).toContainText('Barbell front squat')
     }
   })
 
@@ -109,7 +114,7 @@ test('walking every step and finishing lands on Today with the chosen answers', 
   const main = page.getByRole('main')
   await expect(main).toContainText('Get stronger')
   await expect(main).toContainText('Advanced')
-  await expect(main).toContainText('Front squat')
+  await expect(main).toContainText('Barbell front squat')
   await expect(main).toContainText('Knee')
 
   const stored = await readStoredProfile(page)

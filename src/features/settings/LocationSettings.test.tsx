@@ -2,7 +2,17 @@ import { describe, expect, it } from 'vitest'
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { createLocation } from '../../core/validation/schemas'
+import { EQUIPMENT, defaultEquipmentFor } from '../../catalog/equipment'
 import { makeProfile, renderSettings } from './settingsTestHarness'
+
+/**
+ * The seeded item counts come from the equipment catalogue rather than a number
+ * typed here. The catalogue grows as the exercise catalog needs more kit, and a
+ * hand-written total would then fail on the growth instead of on the screen;
+ * what the catalogue holds is pinned exactly in `catalog/equipment/equipment.test.ts`.
+ */
+const GYM_ITEMS = defaultEquipmentFor('gym').length
+const HOME_ITEMS = defaultEquipmentFor('home').length
 
 const ONE_LOCATION = makeProfile({
   locations: [createLocation('gym', 'Gym', 'loc-gym')],
@@ -13,16 +23,24 @@ describe('SettingsScreen — locations and equipment', () => {
   it('lists every saved location with its equipment count and marks the active one', async () => {
     renderSettings()
 
-    expect(await screen.findByRole('button', { name: /^Gym location Gym 16 items/ })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /^Home location Home 9 items/ })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /^Gym location Gym 16 items Active/ })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('button', { name: new RegExp(`^Gym location Gym ${GYM_ITEMS} items`) }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: new RegExp(`^Home location Home ${HOME_ITEMS} items`) }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: new RegExp(`^Gym location Gym ${GYM_ITEMS} items Active`) }),
+    ).toBeInTheDocument()
   })
 
   it('refuses to delete the last location and says why', async () => {
     const harness = renderSettings(ONE_LOCATION)
     const user = userEvent.setup()
 
-    await user.click(await screen.findByRole('button', { name: /^Gym location Gym 16 items/ }))
+    await user.click(
+      await screen.findByRole('button', { name: new RegExp(`^Gym location Gym ${GYM_ITEMS} items`) }),
+    )
     const sheet = within(screen.getByRole('dialog', { name: 'Edit Gym' }))
 
     expect(sheet.getByRole('button', { name: 'Delete location' })).toBeDisabled()
@@ -36,7 +54,9 @@ describe('SettingsScreen — locations and equipment', () => {
     const harness = renderSettings()
     const user = userEvent.setup()
 
-    await user.click(await screen.findByRole('button', { name: /^Home location Home 9 items/ }))
+    await user.click(
+      await screen.findByRole('button', { name: new RegExp(`^Home location Home ${HOME_ITEMS} items`) }),
+    )
     await user.click(screen.getByRole('button', { name: 'Delete location' }))
 
     const confirm = within(screen.getByRole('dialog', { name: 'Delete Home?' }))
@@ -51,7 +71,9 @@ describe('SettingsScreen — locations and equipment', () => {
     const harness = renderSettings()
     const user = userEvent.setup()
 
-    await user.click(await screen.findByRole('button', { name: /^Gym location Gym 16 items/ }))
+    await user.click(
+      await screen.findByRole('button', { name: new RegExp(`^Gym location Gym ${GYM_ITEMS} items`) }),
+    )
     await user.click(screen.getByRole('button', { name: 'Delete location' }))
 
     const confirm = within(screen.getByRole('dialog', { name: 'Delete Gym?' }))
@@ -94,7 +116,9 @@ describe('SettingsScreen — locations and equipment', () => {
     const harness = renderSettings()
     const user = userEvent.setup()
 
-    await user.click(await screen.findByRole('button', { name: /^Home location Home 9 items/ }))
+    await user.click(
+      await screen.findByRole('button', { name: new RegExp(`^Home location Home ${HOME_ITEMS} items`) }),
+    )
     const name = screen.getByRole('textbox', { name: 'Name' })
     await user.clear(name)
     await user.type(name, 'Garage')
@@ -122,10 +146,14 @@ describe('SettingsScreen — locations and equipment', () => {
     renderSettings()
     const user = userEvent.setup()
 
-    await user.click(await screen.findByRole('button', { name: /^Gym location Gym 16 items/ }))
+    await user.click(
+      await screen.findByRole('button', { name: new RegExp(`^Gym location Gym ${GYM_ITEMS} items`) }),
+    )
     const chips = screen.getAllByRole('checkbox')
 
-    expect(chips).toHaveLength(17)
+    // Every chip, in the catalogue's own order, and nothing the catalogue does not
+    // name — which a count alone would not have caught.
+    expect(chips.map((chip) => chip.textContent)).toEqual(EQUIPMENT.map((item) => item.label))
     expect(chips.map((chip) => chip.textContent)).toContain('Selectorised machines')
   })
 })

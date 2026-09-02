@@ -7,7 +7,17 @@ import { createProfileRepository } from '../../core/storage/profileRepository'
 import { fixedClock } from '../../core/time/clock'
 import { profileValidator } from '../../core/validation/validate'
 import { PROFILE_ID, createDefaultProfile, createLocation, type Profile } from '../../core/validation/schemas'
+import { defaultEquipmentFor } from '../../catalog/equipment'
 import { PlanScreen } from './PlanScreen'
+
+/**
+ * The seeded item counts come from the equipment catalogue rather than a number
+ * typed here. The catalogue grows as the exercise catalog needs more kit, and a
+ * hand-written total would then fail on the growth instead of on the screen;
+ * what the catalogue holds is pinned exactly in `catalog/equipment/equipment.test.ts`.
+ */
+const GYM_ITEMS = defaultEquipmentFor('gym').length
+const HOME_ITEMS = defaultEquipmentFor('home').length
 
 const NOW = '2026-09-01T12:00:00.000Z'
 
@@ -74,8 +84,8 @@ describe('PlanScreen', () => {
     expect(gym).toBeInTheDocument()
     expect(home).toBeInTheDocument()
 
-    expect(screen.getByText('Gym · 16 items')).toBeInTheDocument()
-    expect(screen.getByText('Home · 9 items')).toBeInTheDocument()
+    expect(screen.getByText(`Gym · ${GYM_ITEMS} items`)).toBeInTheDocument()
+    expect(screen.getByText(`Home · ${HOME_ITEMS} items`)).toBeInTheDocument()
     expect(screen.getAllByText('Adjustable dumbbells')).toHaveLength(2)
     expect(screen.getAllByText('Selectorised machines')).toHaveLength(1)
     expect(screen.getByText('Active')).toBeInTheDocument()

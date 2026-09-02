@@ -73,8 +73,11 @@ test.describe('the app, on a device that has finished setup', () => {
           availableDays: ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'],
         },
         exercisePreferences: {
-          preferred: ['Bulgarian split squat with a very long descriptive name'],
-          disliked: [],
+          preferred: {
+            exerciseIds: [],
+            freeText: ['Bulgarian split squat with a very long descriptive name'],
+          },
+          disliked: { exerciseIds: [], freeText: [] },
         },
       }),
     )

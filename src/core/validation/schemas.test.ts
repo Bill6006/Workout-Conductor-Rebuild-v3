@@ -13,6 +13,7 @@ import {
   profileSchema,
   type Profile,
 } from './schemas'
+import { emptyExercisePreferenceList, exercisePreferenceCount } from './schemas'
 import { formatIssues, parseProfile } from './validate'
 import { EQUIPMENT } from '../../catalog/equipment/equipment'
 
@@ -28,8 +29,8 @@ function raw(profile: Profile = base()): Record<string, unknown> {
 }
 
 describe('SCHEMA_VERSION', () => {
-  it('is the Phase 1 baseline', () => {
-    expect(SCHEMA_VERSION).toBe(1)
+  it('is version 2 — catalog-backed exercise preferences', () => {
+    expect(SCHEMA_VERSION).toBe(2)
   })
 })
 
@@ -62,7 +63,10 @@ describe('createDefaultProfile', () => {
       avoidBarbellSquat: false,
       notes: '',
     })
-    expect(profile.exercisePreferences).toEqual({ preferred: [], disliked: [] })
+    expect(profile.exercisePreferences).toEqual({
+      preferred: { exerciseIds: [], freeText: [] },
+      disliked: { exerciseIds: [], freeText: [] },
+    })
     expect(profile.onboardingCompletedAt).toBeNull()
   })
 
@@ -182,10 +186,65 @@ describe('field boundaries', () => {
     expectRejected({ limitations: { ...base().limitations, notes: 'x'.repeat(501) } })
   })
 
-  it('takes free-text exercise preferences but not empty entries', () => {
-    expectAccepted({ exercisePreferences: { preferred: ['Incline press'], disliked: ['Burpees'] } })
-    expectRejected({ exercisePreferences: { preferred: [''], disliked: [] } })
-    expectRejected({ exercisePreferences: { preferred: 'Incline press', disliked: [] } })
+  it('takes catalog-backed exercise preferences, with the typed words kept beside them', () => {
+    expectAccepted({
+      exercisePreferences: {
+        preferred: { exerciseIds: ['incline-dumbbell-press'], freeText: ['that machine by the window'] },
+        disliked: { exerciseIds: ['custom:my-own-thing'], freeText: [] },
+      },
+    })
+    expectAccepted({
+      exercisePreferences: {
+        preferred: { exerciseIds: [], freeText: ['Incline press'] },
+        disliked: { exerciseIds: [], freeText: ['Burpees'] },
+      },
+    })
+  })
+
+  it('refuses the version 1 shape and anything that is not two lists', () => {
+    // The v1 shape is a real record's shape, so it must be REJECTED here rather
+    // than coerced: it reaches this schema only after the migration has run, and
+    // accepting it would hide a migration that silently did nothing.
+    expectRejected({ exercisePreferences: { preferred: ['Incline press'], disliked: [] } })
+    expectRejected({
+      exercisePreferences: {
+        preferred: { exerciseIds: [], freeText: [''] },
+        disliked: { exerciseIds: [], freeText: [] },
+      },
+    })
+    expectRejected({
+      exercisePreferences: {
+        preferred: { exerciseIds: [], freeText: 'Incline press' },
+        disliked: { exerciseIds: [], freeText: [] },
+      },
+    })
+    expectRejected({
+      exercisePreferences: {
+        preferred: { exerciseIds: [] },
+        disliked: { exerciseIds: [], freeText: [] },
+      },
+    })
+  })
+
+  it('takes only a real exercise id in exerciseIds, so a typed name cannot pass as one', () => {
+    expectRejected({
+      exercisePreferences: {
+        preferred: { exerciseIds: ['Incline Dumbbell Press'], freeText: [] },
+        disliked: { exerciseIds: [], freeText: [] },
+      },
+    })
+    expectRejected({
+      exercisePreferences: {
+        preferred: { exerciseIds: ['incline_dumbbell_press'], freeText: [] },
+        disliked: { exerciseIds: [], freeText: [] },
+      },
+    })
+    expectRejected({
+      exercisePreferences: {
+        preferred: { exerciseIds: [''], freeText: [] },
+        disliked: { exerciseIds: [], freeText: [] },
+      },
+    })
   })
 
   it('needs at least one location, with equipment drawn from the catalogue', () => {
@@ -319,5 +378,24 @@ describe('location helpers', () => {
   it('falls back to the first location when the active one has gone missing', () => {
     const profile = { ...base(), activeLocationId: 'loc-nowhere' }
     expect(activeLocation(profile).id).toBe(DEFAULT_GYM_LOCATION_ID)
+  })
+})
+
+describe('the exercise-preference helpers', () => {
+  it('makes an empty side with both lists present, never a partial one', () => {
+    expect(emptyExercisePreferenceList()).toEqual({ exerciseIds: [], freeText: [] })
+  })
+
+  it('makes a fresh object each time, so two sides never share an array', () => {
+    const first = emptyExercisePreferenceList()
+    const second = emptyExercisePreferenceList()
+    first.freeText.push('Burpees')
+    expect(second.freeText).toEqual([])
+  })
+
+  it('counts what a person listed, wherever it landed', () => {
+    expect(exercisePreferenceCount(emptyExercisePreferenceList())).toBe(0)
+    expect(exercisePreferenceCount({ exerciseIds: ['squat'], freeText: ['a machine'] })).toBe(2)
+    expect(exercisePreferenceCount({ exerciseIds: [], freeText: ['a machine'] })).toBe(1)
   })
 })

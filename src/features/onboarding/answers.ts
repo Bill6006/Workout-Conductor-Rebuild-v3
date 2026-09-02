@@ -53,8 +53,16 @@ export function answersFromProfile(profile: Profile): OnboardingAnswers {
     bodyweight: profile.bodyweight ? { ...profile.bodyweight } : null,
     limitations: { ...profile.limitations },
     exercisePreferences: {
-      preferred: [...profile.exercisePreferences.preferred],
-      disliked: [...profile.exercisePreferences.disliked],
+      preferred: {
+        ...profile.exercisePreferences.preferred,
+        exerciseIds: [...profile.exercisePreferences.preferred.exerciseIds],
+        freeText: [...profile.exercisePreferences.preferred.freeText],
+      },
+      disliked: {
+        ...profile.exercisePreferences.disliked,
+        exerciseIds: [...profile.exercisePreferences.disliked.exerciseIds],
+        freeText: [...profile.exercisePreferences.disliked.freeText],
+      },
     },
     locations: profile.locations.map((location) => ({ ...location, equipment: [...location.equipment] })),
     activeLocationId: profile.activeLocationId,

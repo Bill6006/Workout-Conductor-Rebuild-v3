@@ -1,28 +1,41 @@
 import { SCHEMA_VERSION } from '../validation/schemas'
+import { migrateExercisePreferencesToV2, type ExerciseIdResolver } from './exercisePreferencesMigration'
 
 /**
  * Version-to-version migration, with unknown-field preservation.
  *
- * Version 1 is the baseline, so `PROFILE_MIGRATIONS` is deliberately empty — this
- * file is the machinery and the registry, not a pile of no-op steps.
- *
- * ADDING VERSION 2:
+ * ADDING A VERSION:
  *   1. Bump `SCHEMA_VERSION` in core/validation/schemas.ts and change the schema.
- *   2. Append one entry to `PROFILE_MIGRATIONS`:
- *
- *        {
- *          from: 1,
- *          to: 2,
- *          description: 'split bodyweight into value + unit history',
- *          migrate: (record) => ({ ...record, bodyweightHistory: [] }),
- *        }
- *
- *   3. Add a test that feeds a real version-1 record through `migrateProfileRecord`.
+ *   2. Append one entry to `PROFILE_MIGRATIONS`, from the current top version to
+ *      the new one, with a one-line `description` a log can print.
+ *   3. Add a test that feeds a real record of the older version through
+ *      `migrateProfileRecord` and validates the result.
  *
  * A migration only has to produce the fields it changes. The runner carries every
  * other key through untouched — including keys written by a FUTURE build that this
  * one has never heard of — unless the migration names them in `removes`.
+ *
+ * MIGRATIONS ARE PURE, AND THEY DO NOT GO LOOKING FOR THINGS. A step that needs to
+ * know something the record does not contain — whether a typed exercise name is in
+ * the catalog, say — takes it from the injected `MigrationContext` rather than
+ * importing it. That is what keeps the boot path free of catalog data, and it is
+ * what makes every step testable with a stub instead of a fixture.
  */
+
+/**
+ * What a migration may be given from outside. Everything on it is optional, and
+ * every step must produce a correct, lossless result without it — a caller that
+ * cannot supply a resolver still gets a valid profile, just one where fewer typed
+ * entries were recognised.
+ */
+export interface MigrationContext {
+  /**
+   * Typed exercise text to a catalog id, or `null` when nothing matched exactly.
+   * Build one with `createExerciseNameResolver` from `catalog/exercises` AFTER
+   * dynamically importing the catalog data; never import that data to get here.
+   */
+  readonly resolveExerciseId?: ExerciseIdResolver
+}
 
 export interface Migration {
   readonly from: number
@@ -30,11 +43,18 @@ export interface Migration {
   readonly description: string
   /** Keys this step deliberately drops. Everything not listed is carried through. */
   readonly removes?: readonly string[]
-  migrate(record: Record<string, unknown>): Record<string, unknown>
+  migrate(record: Record<string, unknown>, context: MigrationContext): Record<string, unknown>
 }
 
 /** The registry. Ordered by `from`; exactly one step per version boundary. */
-export const PROFILE_MIGRATIONS: readonly Migration[] = []
+export const PROFILE_MIGRATIONS: readonly Migration[] = [
+  {
+    from: 1,
+    to: 2,
+    description: 'exercise preferences become catalog-backed, keeping unmatched text verbatim',
+    migrate: (record, context) => migrateExercisePreferencesToV2(record, context.resolveExerciseId),
+  },
+]
 
 export const VERSION_KEY = 'schemaVersion'
 
@@ -94,6 +114,7 @@ export function migrateRecord(
   raw: unknown,
   migrations: readonly Migration[],
   targetVersion: number,
+  context: MigrationContext = {},
 ): MigrationResult {
   if (!isRecord(raw)) {
     return { ok: false, reason: 'not-a-record', message: 'Expected a stored object.', fromVersion: null }
@@ -135,7 +156,7 @@ export function migrateRecord(
 
     let next: Record<string, unknown>
     try {
-      next = step.migrate({ ...current })
+      next = step.migrate({ ...current }, context)
     } catch (error) {
       return {
         ok: false,
@@ -165,7 +186,14 @@ export function migrateRecord(
   return { ok: true, value: current, fromVersion, toVersion: version, applied }
 }
 
-/** Brings a stored profile record up to the current `SCHEMA_VERSION`. */
-export function migrateProfileRecord(raw: unknown): MigrationResult {
-  return migrateRecord(raw, PROFILE_MIGRATIONS, SCHEMA_VERSION)
+/**
+ * Brings a stored profile record up to the current `SCHEMA_VERSION`.
+ *
+ * `context` is optional and omitting it is safe: the v1 -> v2 step then keeps
+ * every typed exercise preference as free text rather than resolving any of it to
+ * a catalog id, which loses nothing. Pass `resolveExerciseId` from a call site
+ * that already holds the catalog.
+ */
+export function migrateProfileRecord(raw: unknown, context: MigrationContext = {}): MigrationResult {
+  return migrateRecord(raw, PROFILE_MIGRATIONS, SCHEMA_VERSION, context)
 }

@@ -1,0 +1,252 @@
+/*
+ * The picker's own layout. Everything it renders is either a shared primitive
+ * (FormField, ChipGroup) or a row defined here; there is no second chip style
+ * and no second sheet.
+ *
+ * NARROW IS THE DESIGN TARGET, not an afterthought. Every row is a column at
+ * 240 CSS px and stays a column at 360 — the metadata line under an exercise
+ * name is long ("Chest · Barbell, Flat bench"), so it wraps rather than pushing
+ * the row sideways. `min-width: 0` on every flex child is what lets it.
+ */
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-4);
+  min-width: 0;
+}
+
+.search {
+  inline-size: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: var(--wc-s-3) var(--wc-s-4);
+  border: 1px solid var(--wc-line-strong);
+  border-radius: var(--wc-r-md);
+  background: var(--wc-surface-2);
+  color: var(--wc-text);
+  font: var(--wc-t-body);
+}
+
+.search::placeholder {
+  color: var(--wc-text-faint);
+}
+
+.search:focus-visible {
+  border-color: var(--wc-lime-edge);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-3);
+  min-width: 0;
+}
+
+.sectionHead {
+  font: var(--wc-t-small);
+  color: var(--wc-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.status {
+  min-height: 18px;
+  font: var(--wc-t-small);
+  color: var(--wc-text-soft);
+  overflow-wrap: anywhere;
+}
+
+/* ------------------------------------------------------- the replace banner */
+
+.replacing {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--wc-s-2);
+  min-width: 0;
+  padding: var(--wc-s-3);
+  border: 1px solid var(--wc-lime-edge);
+  border-radius: var(--wc-r-md);
+  background: var(--wc-lime-wash);
+}
+
+.replacingText {
+  flex: 1 1 160px;
+  min-width: 0;
+  font: var(--wc-t-small);
+  color: var(--wc-text-soft);
+  overflow-wrap: anywhere;
+}
+
+.linkButton {
+  flex: none;
+  min-height: 44px;
+  padding: var(--wc-s-2) var(--wc-s-3);
+  border-radius: var(--wc-r-pill);
+  color: var(--wc-lime);
+  font: var(--wc-t-small);
+  text-decoration: underline;
+}
+
+.linkButton:hover {
+  color: var(--wc-lime-bright);
+}
+
+/* ---------------------------------------------------- the person's own words */
+
+.ownWords {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-2);
+  min-width: 0;
+  padding: var(--wc-s-3);
+  border: 1px dashed var(--wc-line-strong);
+  border-radius: var(--wc-r-md);
+  background: var(--wc-bg-elevated);
+}
+
+.ownList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-2);
+  min-width: 0;
+}
+
+.ownRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--wc-s-2);
+  min-width: 0;
+}
+
+.ownText {
+  flex: 1 1 120px;
+  min-width: 0;
+  font: var(--wc-t-body);
+  color: var(--wc-text);
+  overflow-wrap: anywhere;
+}
+
+.ownActions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--wc-s-2);
+}
+
+.ownAction {
+  min-height: 44px;
+  padding: var(--wc-s-2) var(--wc-s-3);
+  border: 1px solid var(--wc-line-strong);
+  border-radius: var(--wc-r-pill);
+  background: var(--wc-surface-2);
+  color: var(--wc-text-soft);
+  font: var(--wc-t-small);
+  white-space: nowrap;
+}
+
+.ownAction:hover {
+  background: var(--wc-surface-3);
+  color: var(--wc-text);
+}
+
+.ownRemove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  inline-size: 44px;
+  block-size: 44px;
+  border-radius: var(--wc-r-pill);
+  color: var(--wc-text-muted);
+  font: 600 20px / 1 var(--wc-font);
+}
+
+.ownRemove:hover {
+  color: var(--wc-danger);
+}
+
+/* ------------------------------------------------------------- the results */
+
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-2);
+  min-width: 0;
+}
+
+.result,
+.keepWords {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  inline-size: 100%;
+  min-width: 0;
+  min-height: 56px;
+  padding: var(--wc-s-3) var(--wc-s-4);
+  border: 1px solid var(--wc-line);
+  border-radius: var(--wc-r-md);
+  background: var(--wc-surface-2);
+  text-align: start;
+  transition:
+    background-color var(--wc-dur-fast) var(--wc-ease),
+    border-color var(--wc-dur-fast) var(--wc-ease);
+}
+
+.result:hover,
+.keepWords:hover {
+  background: var(--wc-surface-3);
+}
+
+.keepWords {
+  border-style: dashed;
+}
+
+.resultOn {
+  border-color: var(--wc-lime-edge);
+  background: var(--wc-lime-wash);
+}
+
+.resultOn:hover {
+  background: var(--wc-lime-wash);
+  border-color: var(--wc-lime);
+}
+
+.resultName {
+  min-width: 0;
+  font: var(--wc-t-body);
+  color: var(--wc-text);
+  overflow-wrap: anywhere;
+}
+
+.resultOn .resultName {
+  color: var(--wc-lime);
+}
+
+.resultMeta {
+  min-width: 0;
+  font: var(--wc-t-small);
+  color: var(--wc-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.loading,
+.empty {
+  font: var(--wc-t-small);
+  color: var(--wc-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.failure {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--wc-s-2);
+  min-width: 0;
+  font: var(--wc-t-small);
+  color: var(--wc-danger);
+  overflow-wrap: anywhere;
+}

@@ -2,6 +2,10 @@ import { readFileSync, writeFileSync } from 'node:fs'
 import { expect, test, type Page } from '@playwright/test'
 import { readStoredProfile, startWithProfile, type SeedProfile } from './appState'
 
+// Pinned to the app's own constant so a schema bump does not silently rot this
+// spec into asserting a version the build no longer writes.
+const CURRENT_SCHEMA_VERSION = 2
+
 /**
  * Export and import, driven the way a person drives them: a real download, a
  * real file chooser, and a preview that has to describe the file before anything
@@ -50,7 +54,7 @@ test('export writes a JSON envelope that matches the stored profile', async ({ p
   }
 
   expect(envelope.app).toBe('workout-conductor')
-  expect(envelope.schemaVersion).toBe(1)
+  expect(envelope.schemaVersion).toBe(CURRENT_SCHEMA_VERSION)
   expect(Number.isNaN(Date.parse(envelope.exportedAt))).toBe(false)
   // Not "looks like a profile" — the same profile, field for field.
   expect(envelope.data.profile).toEqual(await readStoredProfile(page))
@@ -140,7 +144,7 @@ test('a backup from a future version is refused and names the versions', async (
   const sheet = page.getByRole('dialog', { name: 'This file cannot be imported' })
   await expect(sheet).toBeVisible()
   await expect(sheet).toContainText('version 99')
-  await expect(sheet).toContainText('understands version 1')
+  await expect(sheet).toContainText(`understands version ${CURRENT_SCHEMA_VERSION}`)
   await expect(sheet.getByRole('button', { name: 'Replace my profile' })).toHaveCount(0)
 
   await sheet.getByRole('button', { name: 'Close', exact: true }).first().click()

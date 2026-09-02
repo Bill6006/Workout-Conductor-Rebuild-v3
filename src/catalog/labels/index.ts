@@ -10,6 +10,7 @@ export {
   daysSummary,
   equipmentNames,
   equipmentSummary,
+  exercisePreferenceNames,
   experienceLabel,
   goalLabel,
   goalsSummary,

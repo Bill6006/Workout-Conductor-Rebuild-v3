@@ -3,6 +3,7 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import {
   EXPERIENCE_LABELS,
+  exercisePreferenceNames,
   GOAL_LABELS,
   LOCATION_KIND_LABELS,
   REST_STYLE_LABELS,
@@ -171,5 +172,48 @@ describe('one owner', () => {
 
   it('leaves no labels module behind in a feature folder', () => {
     expect(files.filter((file) => /[\\/]labels\.tsx?$/.test(file))).toEqual([])
+  })
+})
+
+describe('exercisePreferenceNames', () => {
+  it('reads the resolved exercises first, then the words nothing matched', () => {
+    expect(
+      exercisePreferenceNames({
+        exerciseIds: ['incline-dumbbell-press'],
+        freeText: ['that machine by the window'],
+      }),
+    ).toEqual(['Incline dumbbell press', 'that machine by the window'])
+  })
+
+  it('humanises an id when the caller has no catalog loaded, rather than showing a slug', () => {
+    expect(exercisePreferenceNames({ exerciseIds: ['custom:my-machine'], freeText: [] })).toEqual([
+      'My machine',
+    ])
+  })
+
+  it('uses the real name when a caller that holds the catalog supplies one', () => {
+    const names = new Map([['incline-dumbbell-press', 'Incline dumbbell press (30 degrees)']])
+    expect(
+      exercisePreferenceNames(
+        { exerciseIds: ['incline-dumbbell-press'], freeText: [] },
+        (id) => names.get(id) ?? null,
+      ),
+    ).toEqual(['Incline dumbbell press (30 degrees)'])
+  })
+
+  it('falls back to the humanised id when the lookup does not know one', () => {
+    expect(
+      exercisePreferenceNames({ exerciseIds: ['barbell-back-squat'], freeText: [] }, () => null),
+    ).toEqual(['Barbell back squat'])
+  })
+
+  it('keeps a person’s own spelling exactly as they typed it', () => {
+    expect(exercisePreferenceNames({ exerciseIds: [], freeText: ['  BURPEES!!  '] })).toEqual([
+      '  BURPEES!!  ',
+    ])
+  })
+
+  it('reads an empty side as nothing at all', () => {
+    expect(exercisePreferenceNames({ exerciseIds: [], freeText: [] })).toEqual([])
   })
 })

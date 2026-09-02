@@ -1,6 +1,6 @@
 # Phase 1 — Product Foundation and First Useful Live Preview
 
-**Status: YELLOW — submitted for review.**
+**Status: GREEN — approved by the owner on 2026-09-01.**
 
 |              |                                                                                                      |
 | ------------ | ---------------------------------------------------------------------------------------------------- |
@@ -183,10 +183,11 @@ deployment. The ones worth naming:
 The owner reviews the live app and records one of `GREEN - NEXT PHASE`,
 `YELLOW - FIX: <issue>`, or `RED - STOP`. This phase does not advance itself.
 
-**Decision:**
+**Decision:** `GREEN - NEXT PHASE`
 
-**Reviewed by:**
+**Reviewed by:** the project owner, on the deployed Pages build
 
-**Date:**
+**Date:** 2026-09-01
 
-**Notes:**
+**Notes:** Approved without change requests. Phase 2 — Exercise Catalog, Media, and
+Conflict Engine — follows.

@@ -4,8 +4,9 @@ import { z } from 'zod'
  * THE canonical equipment list.
  *
  * This file is the single owner of equipment identity for the whole app. Phase 2
- * extends this array (and may add fields to `EquipmentItem`); it must never gain a
- * rival list. Anything that needs an equipment id, label, or ordering imports from
+ * extended this array with the items the exercise catalog needs — a trap bar, a
+ * landmine, loose plates, a preacher and a back-extension bench, a suspension
+ * trainer, an ab wheel, and a box to step on. It must never gain a rival list. Anything that needs an equipment id, label, or ordering imports from
  * here — screens, schemas, the future exercise catalog, and the future generator.
  *
  * Ids are stable, kebab-case, and durable: they are written into saved profiles, so
@@ -15,20 +16,28 @@ import { z } from 'zod'
 export const EQUIPMENT_IDS = [
   'barbell',
   'ez-bar',
+  'trap-bar',
   'dumbbells',
   'adjustable-dumbbells',
   'kettlebell',
+  'weight-plates',
   'flat-bench',
   'adjustable-bench',
+  'preacher-bench',
+  'back-extension-bench',
   'squat-rack',
   'smith-machine',
+  'landmine',
   'cable-machine',
   'lat-pulldown',
   'leg-press',
   'selectorised-machines',
   'pull-up-bar',
   'dip-bars',
+  'suspension-trainer',
   'resistance-bands',
+  'ab-wheel',
+  'plyo-box',
   'bodyweight-only',
 ] as const
 
@@ -45,20 +54,28 @@ export interface EquipmentItem {
 export const EQUIPMENT: readonly EquipmentItem[] = [
   { id: 'barbell', label: 'Barbell', homeLikely: false },
   { id: 'ez-bar', label: 'EZ bar', homeLikely: false },
+  { id: 'trap-bar', label: 'Trap bar', homeLikely: false },
   { id: 'dumbbells', label: 'Dumbbells', homeLikely: true },
   { id: 'adjustable-dumbbells', label: 'Adjustable dumbbells', homeLikely: true },
   { id: 'kettlebell', label: 'Kettlebell', homeLikely: true },
+  { id: 'weight-plates', label: 'Weight plates', homeLikely: true },
   { id: 'flat-bench', label: 'Flat bench', homeLikely: true },
   { id: 'adjustable-bench', label: 'Adjustable bench', homeLikely: true },
+  { id: 'preacher-bench', label: 'Preacher bench', homeLikely: false },
+  { id: 'back-extension-bench', label: 'Back extension', homeLikely: false },
   { id: 'squat-rack', label: 'Squat rack', homeLikely: false },
   { id: 'smith-machine', label: 'Smith machine', homeLikely: false },
+  { id: 'landmine', label: 'Landmine', homeLikely: false },
   { id: 'cable-machine', label: 'Cable machine', homeLikely: false },
   { id: 'lat-pulldown', label: 'Lat pulldown', homeLikely: false },
   { id: 'leg-press', label: 'Leg press', homeLikely: false },
   { id: 'selectorised-machines', label: 'Selectorised machines', homeLikely: false },
   { id: 'pull-up-bar', label: 'Pull-up bar', homeLikely: true },
   { id: 'dip-bars', label: 'Dip bars', homeLikely: true },
+  { id: 'suspension-trainer', label: 'Suspension trainer', homeLikely: true },
   { id: 'resistance-bands', label: 'Resistance bands', homeLikely: true },
+  { id: 'ab-wheel', label: 'Ab wheel', homeLikely: true },
+  { id: 'plyo-box', label: 'Plyo box or step', homeLikely: true },
   { id: 'bodyweight-only', label: 'Bodyweight only', homeLikely: true },
 ]
 

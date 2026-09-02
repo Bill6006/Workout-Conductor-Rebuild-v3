@@ -9,6 +9,7 @@ import { SETTING_NAMES } from '../../core/storage/settings'
 import { setClock, steppingClock } from '../../core/time/clock'
 import {
   PROFILE_ID,
+  SCHEMA_VERSION,
   createDefaultProfile,
   parseProfile,
   profileValidator,
@@ -375,7 +376,7 @@ describe('finishing', () => {
     expect(profile.limitations.knee).toBe(true)
     expect(profile.onboardingCompletedAt).not.toBeNull()
     expect(profile.id).toBe('primary')
-    expect(profile.schemaVersion).toBe(1)
+    expect(profile.schemaVersion).toBe(SCHEMA_VERSION)
   })
 
   it('surfaces the failure message from the store, and does not call back', async () => {
