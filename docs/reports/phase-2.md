@@ -2,12 +2,12 @@
 
 **Status: YELLOW — submitted for review.**
 
-|              |                                                          |
-| ------------ | -------------------------------------------------------- |
-| Live app     | https://bill6006.github.io/Workout-Conductor-Rebuild-v3/ |
-| Build marker | _pending deployment_                                     |
-| Commit       | _pending deployment_                                     |
-| Workflow run | _pending deployment_                                     |
+|              |                                                                                                      |
+| ------------ | ---------------------------------------------------------------------------------------------------- |
+| Live app     | https://bill6006.github.io/Workout-Conductor-Rebuild-v3/                                             |
+| Build marker | `phase2-7-248fd81`                                                                                   |
+| Commit       | [`248fd81`](https://github.com/Bill6006/Workout-Conductor-Rebuild-v3/commit/248fd81)                 |
+| Workflow run | [run 33644512533](https://github.com/Bill6006/Workout-Conductor-Rebuild-v3/actions/runs/33644512533) |
 
 ## Scope
 
@@ -115,6 +115,20 @@ regression that creeps back through an innocent-looking import.
 Captured from the real running build. See [docs/screenshots/phase-2/](../screenshots/phase-2/)
 — 40 files covering all eight setup steps and all five tabs at 360x800 and 412x915 (Android)
 and 1280x900 (desktop), plus a contact sheet.
+
+## Verified on the deployed site
+
+Checked against the live URL after deployment, on a Pixel-class Android profile
+(360x800, DPR 3, mobile user agent):
+
+- A first visit lands on setup; completing it lands on Today.
+- Settings opens the exercise picker and it lists real catalog entries.
+- The catalog arrives as a **separate chunk fetched on demand**, confirmed from the
+  browser's own resource timings — the lazy split works in production, not just in the
+  local build output.
+- No console errors and no page errors across the tour.
+- Build marker `phase2-7-248fd81 · build 248fd81 · 2026-09-02 14:49 UTC`, matching the
+  deployed commit.
 
 ## Defects found and fixed during the phase
 
