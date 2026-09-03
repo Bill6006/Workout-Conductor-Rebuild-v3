@@ -19,6 +19,7 @@ import {
   type DurationChoice,
   type Workout,
 } from '../../core/validation/workoutSchema'
+import type { ChangeSummary } from '../../engine/recalibration/types'
 import { DurationControl } from './DurationControl'
 import styles from './SessionCard.module.css'
 
@@ -28,6 +29,8 @@ interface SessionCardProps {
   readonly onChoose: (choice: DurationChoice) => void
   readonly rebuilding: boolean
   readonly nameOf: (exerciseId: string) => string | null
+  /** What the last length change did, shown once so it registers as a change. */
+  readonly lastChange: ChangeSummary | null
   /** Where they are training and how they train — carried over from the profile card. */
   readonly locationName: string
   readonly trainingStyleLabel: string
@@ -48,6 +51,7 @@ export function SessionCard({
   onChoose,
   rebuilding,
   nameOf,
+  lastChange,
   locationName,
   trainingStyleLabel,
 }: SessionCardProps) {
@@ -74,6 +78,16 @@ export function SessionCard({
           ? 'Rebuilding your session…'
           : `About ${workout.estimatedMinutes} min${overruns ? ' — a few minutes over' : ''}. Changing the length rebuilds the session, it does not cut the end off.`}
       </p>
+
+      {/*
+        The compact summary the plan asks for. It appears only after a change,
+        and it says what actually moved rather than that something did.
+      */}
+      {lastChange && !rebuilding && (
+        <p className={styles.changeSummary} data-testid="change-summary">
+          {lastChange.headline}
+        </p>
+      )}
 
       <ol className={styles.list} role="list">
         {rows.map((row) => (

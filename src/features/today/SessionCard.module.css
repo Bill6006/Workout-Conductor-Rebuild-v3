@@ -116,3 +116,17 @@
   text-align: right;
   min-width: 0;
 }
+
+/*
+ * Marked as a change rather than dressed up: it appears after a recalibration
+ * and reads as an aside, not as an alert.
+ */
+.changeSummary {
+  margin: var(--wc-s-2) 0 0;
+  padding: var(--wc-s-2) var(--wc-s-3);
+  border-left: 2px solid var(--wc-lime);
+  border-radius: 0 var(--wc-r-sm) var(--wc-r-sm) 0;
+  background: var(--wc-lime-wash);
+  font: var(--wc-t-small);
+  color: var(--wc-text-soft);
+}

@@ -14,7 +14,7 @@ const REPO_BASE = '/Workout-Conductor-Rebuild-v3/'
 
 const buildMarker = process.env.VITE_BUILD_MARKER ?? 'local-dev'
 const buildPhase =
-  process.env.VITE_BUILD_PHASE ?? 'Phase 3 - Workout Generation and Duration Engine'
+  process.env.VITE_BUILD_PHASE ?? 'Phase 4 - Central Recalibration Engine'
 const buildCommit = process.env.VITE_BUILD_COMMIT ?? 'local'
 const buildTime = process.env.VITE_BUILD_TIME ?? new Date().toISOString()
 

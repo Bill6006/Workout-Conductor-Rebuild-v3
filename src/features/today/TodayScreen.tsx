@@ -5,6 +5,7 @@ import { ScreenHeader } from '../../components/ScreenHeader'
 import { SectionHeading } from '../../components/SectionHeading'
 import { StatTile } from '../../components/StatTile'
 import { Suspense, lazy } from 'react'
+import { CalibrationOverlay } from '../../components/CalibrationOverlay'
 import { useProfile } from '../../core/state'
 import { nowIso } from '../../core/time/clock'
 import { WEEKDAYS, activeLocation, type Profile, type TrainingStyle } from '../../core/validation/schemas'
@@ -168,6 +169,7 @@ export function TodayScreen() {
             onChoose={session.setChoice}
             rebuilding={session.rebuilding}
             nameOf={session.nameOf}
+            lastChange={session.lastChange}
             locationName={activeLocation(profile).name}
             trainingStyleLabel={TRAINING_STYLE_LABEL[profile.trainingStyle]}
           />
@@ -202,6 +204,13 @@ export function TodayScreen() {
           </li>
         </ul>
       </section>
+
+      <CalibrationOverlay
+        open={session.rebuilding || session.recalibrationError !== null}
+        trigger="duration-changed"
+        error={session.recalibrationError}
+        onDismiss={session.dismissError}
+      />
 
       {session.status === 'ready' && session.workout && (
         <Suspense fallback={null}>

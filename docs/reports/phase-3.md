@@ -1,6 +1,6 @@
 # Phase 3 — Workout Generation and Duration Engine
 
-**Status: YELLOW — submitted for review.**
+**Status: GREEN — approved by the owner on 2026-09-03.**
 
 |              |                                                                                                      |
 | ------------ | ---------------------------------------------------------------------------------------------------- |
@@ -198,10 +198,11 @@ that time — not one session with fewer rows. Specifically worth your eye:
 The owner reviews the live app and records one of `GREEN - NEXT PHASE`,
 `YELLOW - FIX: <issue>`, or `RED - STOP`. This phase does not advance itself.
 
-**Decision:**
+**Decision:** `GREEN - NEXT PHASE`
 
-**Reviewed by:**
+**Reviewed by:** the project owner, on the deployed Pages build
 
-**Date:**
+**Date:** 2026-09-03
 
-**Notes:**
+**Notes:** Approved without change requests. Phase 4 — Central Recalibration Engine —
+follows.
