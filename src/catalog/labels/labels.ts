@@ -1,6 +1,7 @@
 import { WEEK_DAYS } from '../../components/DayPicker'
 import { equipmentLabel, sortEquipmentIds } from '../equipment'
 import { humaniseExerciseId } from '../exercises/exerciseId'
+import type { DurationChoice } from '../../core/validation/workoutSchema'
 import {
   WEEKDAYS,
   type ExercisePreferenceList,
@@ -33,7 +34,7 @@ import {
  * equipment names from `equipmentLabel()`, so this file owns no rival list either.
  */
 
-export interface LabelEntry<T extends string> {
+export interface LabelEntry<T extends string | number> {
   readonly value: T
   /** The name of this value in prose, in a row, and on a choice card. */
   readonly label: string
@@ -123,6 +124,49 @@ export const LOCATION_KIND_LABELS: readonly LabelEntry<LocationKind>[] = [
 ]
 
 /**
+ * THE ONE workout-length control, in the order it is shown.
+ *
+ * This is the only place the four choices are named. There is no Full, Lazy,
+ * Short, Density, or Recovery mode to label, and no second length control to
+ * label either — `src/app/App.test.tsx` fails the build if one appears.
+ *
+ * `'default'` reads as "Default time" and NEVER as a number of minutes: it means
+ * the complete duration the current plan generates, which changes as the plan
+ * changes. The resolved figure is `Workout.plannedMinutes`, and
+ * `durationSummary()` below is the one way to render it.
+ *
+ * The descriptions are written to stay clear of the competing-mode words the
+ * product guard rejects, since a choice card may fold its description into the
+ * control's accessible name.
+ */
+export const DURATION_CHOICE_LABELS: readonly LabelEntry<DurationChoice>[] = [
+  {
+    value: 15,
+    label: '15 minutes',
+    shortLabel: '15 min',
+    description: 'A focused session when time is tight.',
+  },
+  {
+    value: 30,
+    label: '30 minutes',
+    shortLabel: '30 min',
+    description: 'Half an hour, with the main lifts intact.',
+  },
+  {
+    value: 45,
+    label: '45 minutes',
+    shortLabel: '45 min',
+    description: 'A longer session with more accessory work.',
+  },
+  {
+    value: 'default',
+    label: 'Default time',
+    shortLabel: 'Default',
+    description: 'The complete session your plan generates. Not a fixed number of minutes.',
+  },
+]
+
+/**
  * Calendar order and coverage come from the schema; the names come from the
  * shared week, so no second day list exists. `shortLabel` is the three-letter
  * prose form ("Mon"), which is what a comma-separated summary needs — the two
@@ -133,17 +177,20 @@ export const WEEKDAY_LABELS: readonly LabelEntry<Weekday>[] = WEEKDAYS.map((valu
   return { value, label: name, shortLabel: name.slice(0, 3) }
 })
 
-function entry<T extends string>(entries: readonly LabelEntry<T>[], value: T): LabelEntry<T> | undefined {
+function entry<T extends string | number>(
+  entries: readonly LabelEntry<T>[],
+  value: T,
+): LabelEntry<T> | undefined {
   return entries.find((candidate) => candidate.value === value)
 }
 
-function labelFrom<T extends string>(entries: readonly LabelEntry<T>[], value: T): string {
-  return entry(entries, value)?.label ?? value
+function labelFrom<T extends string | number>(entries: readonly LabelEntry<T>[], value: T): string {
+  return entry(entries, value)?.label ?? String(value)
 }
 
-function shortLabelFrom<T extends string>(entries: readonly LabelEntry<T>[], value: T): string {
+function shortLabelFrom<T extends string | number>(entries: readonly LabelEntry<T>[], value: T): string {
   const found = entry(entries, value)
-  return found ? (found.shortLabel ?? found.label) : value
+  return found ? (found.shortLabel ?? found.label) : String(value)
 }
 
 export const goalLabel = (value: Goal) => labelFrom(GOAL_LABELS, value)
@@ -152,6 +199,29 @@ export const trainingStyleLabel = (value: TrainingStyle) => labelFrom(TRAINING_S
 export const restStyleLabel = (value: RestStyle) => labelFrom(REST_STYLE_LABELS, value)
 export const unitsLabel = (value: Units) => labelFrom(UNITS_LABELS, value)
 export const locationKindLabel = (value: LocationKind) => labelFrom(LOCATION_KIND_LABELS, value)
+
+/** `15` -> `15 minutes`, `'default'` -> `Default time`. The accessible name of a choice. */
+export const durationChoiceLabel = (value: DurationChoice) => labelFrom(DURATION_CHOICE_LABELS, value)
+/** `15` -> `15 min`, `'default'` -> `Default`. What fits on a segment. */
+export const durationChoiceShortLabel = (value: DurationChoice) =>
+  shortLabelFrom(DURATION_CHOICE_LABELS, value)
+
+/** The four options a segmented length control renders, in order. */
+export function durationChoiceOptions(): { value: DurationChoice; label: string }[] {
+  return segmentOptions(DURATION_CHOICE_LABELS)
+}
+
+/**
+ * How long the session in front of you actually is.
+ *
+ * For 15 / 30 / 45 the choice IS the answer. For `'default'` there is no answer
+ * until a session has been generated, so pass `Workout.plannedMinutes`; passing
+ * `null` yields "Default time", which is the honest thing to show beforehand.
+ */
+export function durationSummary(choice: DurationChoice, plannedMinutes: number | null = null): string {
+  if (choice !== 'default') return durationChoiceShortLabel(choice)
+  return plannedMinutes === null ? durationChoiceLabel('default') : `${plannedMinutes} min`
+}
 
 /** `mon` -> `Monday`. The accessible name a day is announced by. */
 export const weekdayLabel = (value: Weekday) => labelFrom(WEEKDAY_LABELS, value)
@@ -167,7 +237,7 @@ export function weightUnitFor(units: Units): WeightUnit {
  * The options a segmented control renders. Segments are narrow, so each one
  * shows `shortLabel` where the catalogue defines one and `label` otherwise.
  */
-export function segmentOptions<T extends string>(
+export function segmentOptions<T extends string | number>(
   entries: readonly LabelEntry<T>[],
 ): { value: T; label: string }[] {
   return entries.map((option) => ({ value: option.value, label: option.shortLabel ?? option.label }))

@@ -173,21 +173,6 @@ test.describe('the app, on a device that has finished setup', () => {
       expect(box!.x + box!.width).toBeLessThanOrEqual(width + OVERFLOW_SLACK)
     })
   }
-
-  test('the demo session card fits the narrowest viewport', async ({ page }) => {
-    await page.setViewportSize({ width: NARROW_WIDTH, height: 800 })
-    await page.goto('./')
-
-    const card = page
-      .locator('section')
-      .filter({ has: page.getByRole('heading', { level: 2, name: 'Upper body — strength and size' }) })
-
-    await expect(card).toBeVisible()
-    const box = await card.boundingBox()
-    expect(box).not.toBeNull()
-    expect(box!.x + box!.width).toBeLessThanOrEqual(NARROW_WIDTH + OVERFLOW_SLACK)
-    await expectNoHorizontalOverflow(page, `${NARROW_WIDTH}px · demo card`)
-  })
 })
 
 test.describe('setup, on a first visit', () => {

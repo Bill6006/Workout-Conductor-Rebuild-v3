@@ -112,6 +112,26 @@ async function openTab(page, baseUrl, hash, problems) {
     .waitFor({ state: 'detached', timeout: 8_000 })
     .catch(() => {})
 
+  // From Phase 3 the landing card waits on two lazy chunks — the catalog and the
+  // generator — before it has a session to show. Screenshotting the moment the
+  // shell paints would capture "Building your session…" rather than the product.
+  await page
+    .locator('select')
+    .first()
+    .waitFor({ state: 'attached', timeout: 8_000 })
+    .then(async () => {
+      await page
+        .waitForFunction(
+          () => {
+            const select = document.querySelector('select')
+            return !select || !select.disabled
+          },
+          { timeout: 12_000 },
+        )
+        .catch(() => {})
+    })
+    .catch(() => {})
+
   await page.waitForTimeout(SETTLE_MS)
 }
 

@@ -30,9 +30,10 @@ import type { Page } from '@playwright/test'
  */
 
 export const DB_NAME = 'workout-conductor'
-export const DB_VERSION = 1
+export const DB_VERSION = 2
 export const PROFILE_STORE = 'profile'
 export const META_STORE = 'meta'
+export const WORKOUT_STORE = 'workouts'
 export const PROFILE_ID = 'primary'
 /** Mirrors `SCHEMA_VERSION` in src/core/validation/schemas.ts. */
 export const SCHEMA_VERSION = 2
@@ -214,7 +215,7 @@ function prepareOnce(state: PreparedState) {
 
   // Issued synchronously, ahead of any application script, so this connection —
   // and the transaction below it — are ordered before the app's first read.
-  const request = indexedDB.open('workout-conductor', 1)
+  const request = indexedDB.open('workout-conductor', 2)
 
   request.onupgradeneeded = () => {
     const database = request.result
@@ -223,6 +224,10 @@ function prepareOnce(state: PreparedState) {
     }
     if (!database.objectStoreNames.contains('meta')) {
       database.createObjectStore('meta', { keyPath: 'key' })
+    }
+    if (!database.objectStoreNames.contains('workouts')) {
+      const workouts = database.createObjectStore('workouts', { keyPath: 'id' })
+      workouts.createIndex('by-date', 'forDate')
     }
   }
   request.onerror = () => failed(request.error ?? new Error('the app database would not open'))
@@ -289,7 +294,10 @@ export async function prepareError(page: Page): Promise<string | null> {
 export async function readStoredProfile(page: Page): Promise<SeedProfile | null> {
   return page.evaluate(async () => {
     const database = await new Promise<IDBDatabase>((resolve, reject) => {
-      const request = indexedDB.open('workout-conductor', 1)
+      // No version: open whatever is there. Naming a version that is BEHIND the
+      // database on disk is a VersionError, and this reader has no business
+      // deciding the schema version anyway — it only reads.
+      const request = indexedDB.open('workout-conductor')
       request.onsuccess = () => resolve(request.result)
       request.onerror = () => reject(request.error ?? new Error('open failed'))
     })

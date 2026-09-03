@@ -1,4 +1,5 @@
 export {
+  DURATION_CHOICE_LABELS,
   EXPERIENCE_LABELS,
   GOAL_LABELS,
   LOCATION_KIND_LABELS,
@@ -8,6 +9,10 @@ export {
   WEEKDAY_LABELS,
   bodyweightSummary,
   daysSummary,
+  durationChoiceLabel,
+  durationChoiceOptions,
+  durationChoiceShortLabel,
+  durationSummary,
   equipmentNames,
   equipmentSummary,
   exercisePreferenceNames,

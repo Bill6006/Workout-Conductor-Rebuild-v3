@@ -98,11 +98,11 @@ describe('TodayScreen', () => {
     expect(screen.getByText(expected)).toBeInTheDocument()
   })
 
-  it('points forward to the phase that builds real sessions', async () => {
+  it('points forward to the phase that runs a session, not one that builds it', async () => {
     renderToday(seededRepository(completedProfile()))
 
-    expect(await screen.findByRole('heading', { level: 2, name: 'Your real sessions' })).toBeInTheDocument()
-    expect(screen.getByText('Phase 3')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 2, name: 'Running the session' })).toBeInTheDocument()
+    expect(screen.getByText('Phase 5')).toBeInTheDocument()
   })
 
   describe('with a real profile', () => {
@@ -174,65 +174,62 @@ describe('TodayScreen', () => {
     })
   })
 
-  describe('the demo workout preview', () => {
-    it('is labelled as a demo on the screen itself', async () => {
+  describe('the demo fixture is gone', () => {
+    it('shows no labelled sample anywhere, because sessions are real now', async () => {
       renderToday(seededRepository(completedProfile()))
+      await screen.findByRole('heading', { level: 2, name: /Today|Rest day|Training day|and/ })
 
-      expect(await screen.findByText('Demo')).toBeInTheDocument()
-      expect(screen.getByText(/sample session, not your plan/i)).toBeInTheDocument()
-      expect(screen.getByRole('heading', { level: 2, name: /Upper body/ })).toBeInTheDocument()
-    })
-
-    it('adds no way to start, log, or time anything', async () => {
-      renderToday(seededRepository(completedProfile()))
-      await screen.findByText('Demo')
-
-      // The only controls on Today are the two disabled placeholders.
-      const buttons = screen.getAllByRole('button')
-      expect(buttons).toHaveLength(2)
-      for (const button of buttons) expect(button).toBeDisabled()
+      // `demoWorkout.ts` documented its own deletion for this phase. If a
+      // labelled sample survived into a product that generates real sessions it
+      // would be a second source of truth for what a workout is.
+      expect(screen.queryByText('Demo')).not.toBeInTheDocument()
+      expect(screen.queryByText(/sample session, not your plan/i)).not.toBeInTheDocument()
     })
   })
 
   describe('the locked workout-length decision', () => {
     it('exposes exactly one workout-length control', async () => {
       renderToday(seededRepository(completedProfile()))
-      await screen.findByText('Rest day')
+      await screen.findByLabelText(/workout length/i)
 
-      expect(screen.getAllByRole('button', { name: /workout length/i })).toHaveLength(1)
-      expect(screen.getAllByText(/workout length/i)).toHaveLength(1)
+      expect(screen.getAllByRole('combobox', { name: /workout length/i })).toHaveLength(1)
+      expect(screen.queryAllByRole('button', { name: /workout length/i })).toHaveLength(0)
     })
 
-    it('displays the profile default and stays inert until Phase 3', async () => {
+    it('offers exactly the four lengths and nothing else', async () => {
       renderToday(seededRepository(completedProfile()))
-      await screen.findByText('Rest day')
-      const control = screen.getByRole('button', { name: /workout length/i })
+      const control = await screen.findByLabelText(/workout length/i)
 
-      expect(control).toBeDisabled()
-      expect(control).toHaveAttribute('aria-disabled', 'true')
-      expect(control).toHaveTextContent('Default · 60 min')
-      expect(screen.getByText(/15 \/ 30 \/ 45 \/ Default/)).toBeInTheDocument()
+      const options = within(control)
+        .getAllByRole('option')
+        .map((option) => option.textContent)
+      expect(options).toHaveLength(4)
+      expect(options[0]).toMatch(/^15 min$/)
+      expect(options[1]).toMatch(/^30 min$/)
+      expect(options[2]).toMatch(/^45 min$/)
+      expect(options[3]).toMatch(/^Default/)
     })
 
-    it('falls back to a neutral display when there is no profile to read', async () => {
+    it('is inert with no profile, because there is nothing to build for', async () => {
       renderToday(seededRepository(null))
       await screen.findByText('No profile yet')
 
-      expect(screen.getByRole('button', { name: /workout length/i })).toHaveTextContent('Default time')
+      expect(screen.getByLabelText(/workout length/i)).toBeDisabled()
     })
 
-    it('keeps Start Workout disabled and says why', async () => {
+    it('keeps Start Workout disabled, and says the honest reason', async () => {
       renderToday(seededRepository(completedProfile()))
       const start = await screen.findByRole('button', { name: 'Start Workout' })
 
+      // The engine can build a session; nothing can yet run one. Saying so is
+      // the point — Phase 5 brings the logger, the timer, and the rest.
       expect(start).toBeDisabled()
-      expect(start).toHaveAttribute('aria-disabled', 'true')
-      expect(screen.getByText(/no workout engine yet/i)).toBeInTheDocument()
+      expect(screen.getAllByText(/Phase 5/).length).toBeGreaterThan(0)
     })
 
     it('has no second workout-mode control', async () => {
       const { container } = renderToday(seededRepository(completedProfile()))
-      await screen.findByText('Rest day')
+      await screen.findByLabelText(/workout length/i)
 
       // Role-based sweep: nothing focusable is named like a mode switch.
       for (const role of ['button', 'link', 'radio', 'combobox', 'menuitem', 'switch', 'tab'] as const) {

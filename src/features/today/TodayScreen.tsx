@@ -4,14 +4,21 @@ import { PrimaryAction } from '../../components/PrimaryAction'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { SectionHeading } from '../../components/SectionHeading'
 import { StatTile } from '../../components/StatTile'
+import { Suspense, lazy } from 'react'
 import { useProfile } from '../../core/state'
 import { nowIso } from '../../core/time/clock'
 import { WEEKDAYS, activeLocation, type Profile, type TrainingStyle } from '../../core/validation/schemas'
-import { DemoWorkoutCard } from './DemoWorkoutCard'
+import type { DurationChoice } from '../../core/validation/workoutSchema'
+import { DurationControl } from './DurationControl'
+// The generated-session cards read the workout schema's helpers, which pull in
+// the Zod model. They only render once a session exists, so they load with it
+// rather than on the boot chunk.
+const GeneratedSessionCard = lazy(() =>
+  import('./SessionCard').then((module) => ({ default: module.SessionCard })),
+)
+const WhyCard = lazy(() => import('./SessionCard').then((module) => ({ default: module.WhyCard })))
+import { useGeneratedWorkout, type WorkoutStatus } from './useGeneratedWorkout'
 import styles from './TodayScreen.module.css'
-
-const LENGTH_LABEL_ID = 'today-length-label'
-const LENGTH_VALUE_ID = 'today-length-value'
 
 const EM_DASH = '—'
 
@@ -32,25 +39,6 @@ function weekdayKey(date: Date) {
   return WEEKDAYS[(date.getDay() + 6) % 7]
 }
 
-function ChevronDown() {
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.9"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <path d="M6 9.5 12 15.5 18 9.5" />
-    </svg>
-  )
-}
-
 interface FactProps {
   label: string
   value: string
@@ -65,47 +53,11 @@ function Fact({ label, value }: FactProps) {
   )
 }
 
-/**
- * The one workout-length control in the product.
- *
- * LOCKED DECISION: exactly one control — 15 / 30 / 45 / Default — and in Phase 1
- * it is a static display of the profile's default duration. It becomes a working
- * dropdown in Phase 3. There is no second start button and no Full / Lazy /
- * Short / Density / Recovery mode anywhere in the app. `src/app/App.test.tsx`
- * enforces this across every route.
- */
-function WorkoutLength({ minutes }: { minutes: number | null }) {
-  return (
-    <>
-      <div className={styles.lengthRow}>
-        <span className={styles.lengthLabel} id={LENGTH_LABEL_ID}>
-          Workout length
-        </span>
-        <button
-          type="button"
-          className={styles.lengthControl}
-          disabled
-          aria-disabled="true"
-          aria-labelledby={`${LENGTH_LABEL_ID} ${LENGTH_VALUE_ID}`}
-        >
-          <span id={LENGTH_VALUE_ID}>{minutes === null ? 'Default time' : `Default · ${minutes} min`}</span>
-          <ChevronDown />
-        </button>
-      </div>
-      <p className={styles.caption}>
-        One duration control — 15 / 30 / 45 / Default. It becomes a working dropdown in Phase 3.
-      </p>
-    </>
-  )
-}
-
 function StartAction() {
   return (
     <>
       <PrimaryAction disabled>Start Workout</PrimaryAction>
-      <p className={styles.caption}>
-        There is no workout engine yet, so this cannot start a session. It turns on in Phase 3.
-      </p>
+      <p className={styles.caption}>Logging a session arrives in Phase 5, so this cannot start one yet.</p>
     </>
   )
 }
@@ -113,17 +65,25 @@ function StartAction() {
 interface SessionCardProps {
   profile: Profile
   trainingToday: boolean
+  /** Why there is no session to show: still loading, or nothing could be built. */
+  status: Exclude<WorkoutStatus, 'ready'>
+  message: string | null
+  choice: DurationChoice
+  onChoose: (choice: DurationChoice) => void
 }
 
-function SessionCard({ profile, trainingToday }: SessionCardProps) {
+function SessionCard({ profile, trainingToday, status, message, choice, onChoose }: SessionCardProps) {
   const place = activeLocation(profile)
 
   return (
     <Card tone="accent" eyebrow="Today" title={trainingToday ? 'Training day' : 'Rest day'}>
       <p className={styles.copy}>
-        {trainingToday
-          ? 'Today is one of your training days. Your session is not built yet — the workout engine arrives in Phase 3.'
-          : 'Today is not one of your training days. You can still train; the engine that builds sessions arrives in Phase 3.'}
+        {status === 'loading'
+          ? 'Building your session…'
+          : (message ??
+            (trainingToday
+              ? 'Today is one of your training days.'
+              : 'Today is not one of your training days, but you can still train.'))}
       </p>
 
       <dl className={styles.facts} data-testid="today-facts">
@@ -132,7 +92,15 @@ function SessionCard({ profile, trainingToday }: SessionCardProps) {
         <Fact label="Training style" value={TRAINING_STYLE_LABEL[profile.trainingStyle]} />
       </dl>
 
-      <WorkoutLength minutes={profile.schedule.typicalDurationMin} />
+      <DurationControl
+        value={choice}
+        onChange={onChoose}
+        defaultMinutes={profile.schedule.typicalDurationMin}
+        disabled={status === 'loading'}
+      />
+      <p className={styles.caption}>
+        Choosing a length rebuilds the session for that time — it does not cut the end off a longer one.
+      </p>
       <StartAction />
     </Card>
   )
@@ -147,7 +115,7 @@ function EmptySessionCard({ unavailable }: { unavailable: boolean }) {
           : 'Once your profile is set up, this card holds the session for today and the one control that shapes it.'}
       </p>
 
-      <WorkoutLength minutes={null} />
+      <DurationControl value="default" onChange={() => {}} defaultMinutes={null} disabled />
       <StartAction />
     </Card>
   )
@@ -155,6 +123,7 @@ function EmptySessionCard({ unavailable }: { unavailable: boolean }) {
 
 export function TodayScreen() {
   const { profile, status } = useProfile()
+  const session = useGeneratedWorkout(profile)
 
   const today = new Date(nowIso())
   const trainingToday = profile ? profile.schedule.availableDays.includes(weekdayKey(today)) : false
@@ -167,15 +136,34 @@ export function TodayScreen() {
         title="Today"
         subtitle={
           profile
-            ? 'Your training profile, and a sample of what a session looks like.'
+            ? 'Built for your goals, your equipment, and the time you have.'
             : 'Your session will be built here once your profile exists.'
         }
       />
 
-      {profile ? (
-        <SessionCard profile={profile} trainingToday={trainingToday} />
-      ) : (
+      {!profile ? (
         <EmptySessionCard unavailable={status === 'error'} />
+      ) : session.status === 'ready' && session.workout ? (
+        <Suspense fallback={null}>
+          <GeneratedSessionCard
+            workout={session.workout}
+            choice={session.choice}
+            onChoose={session.setChoice}
+            rebuilding={session.rebuilding}
+            nameOf={session.nameOf}
+            locationName={activeLocation(profile).name}
+            trainingStyleLabel={TRAINING_STYLE_LABEL[profile.trainingStyle]}
+          />
+        </Suspense>
+      ) : (
+        <SessionCard
+          profile={profile}
+          trainingToday={trainingToday}
+          status={session.status as Exclude<WorkoutStatus, 'ready'>}
+          message={session.message}
+          choice={session.choice}
+          onChoose={session.setChoice}
+        />
       )}
 
       <section className={styles.group}>
@@ -205,11 +193,15 @@ export function TodayScreen() {
         </ul>
       </section>
 
-      <DemoWorkoutCard />
+      {session.status === 'ready' && session.workout && (
+        <Suspense fallback={null}>
+          <WhyCard workout={session.workout} />
+        </Suspense>
+      )}
 
-      <PhaseNotice phase="Phase 3" heading="Your real sessions">
-        Phase 3 builds the workout engine. It replaces the sample above with a session chosen for your goals,
-        your equipment, and the time you have, and it turns on the length dropdown and the start button.
+      <PhaseNotice phase="Phase 5" heading="Running the session">
+        The engine builds your session and the length dropdown rebuilds it. Logging it — the set logger, the
+        rest timer, and swapping an exercise mid-session — arrives in Phase 5.
       </PhaseNotice>
     </div>
   )

@@ -1,0 +1,118 @@
+.headline {
+  margin: 0;
+  font: var(--wc-t-body);
+  color: var(--wc-text-soft);
+}
+
+.caption {
+  margin: var(--wc-s-2) 0 0;
+  font: var(--wc-t-small);
+  color: var(--wc-text-muted);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-2);
+  margin: var(--wc-s-5) 0;
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--wc-s-3) var(--wc-s-4);
+  border: 1px solid var(--wc-line);
+  border-radius: var(--wc-r-md);
+  background: var(--wc-surface-2);
+  min-width: 0;
+}
+
+.itemHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--wc-s-2);
+  min-width: 0;
+}
+
+.itemTitle {
+  font: var(--wc-t-heading);
+  color: var(--wc-text);
+  min-width: 0;
+}
+
+.itemDetail {
+  font: var(--wc-t-small);
+  color: var(--wc-text-muted);
+}
+
+.points {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-2);
+  margin: 0;
+}
+
+.point {
+  position: relative;
+  padding-left: var(--wc-s-4);
+  font: var(--wc-t-body);
+  color: var(--wc-text-soft);
+}
+
+.point::before {
+  content: '';
+  position: absolute;
+  top: 0.6em;
+  left: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--wc-r-pill);
+  background: var(--wc-lime);
+}
+
+.subhead {
+  margin: var(--wc-s-5) 0 var(--wc-s-2);
+  font: var(--wc-t-label);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--wc-text-muted);
+}
+
+.confidence {
+  margin: var(--wc-s-5) 0 0;
+  font: var(--wc-t-small);
+  color: var(--wc-text-muted);
+}
+
+.facts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-1);
+  margin: var(--wc-s-4) 0 0;
+}
+
+.fact {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--wc-s-3);
+  padding: var(--wc-s-2) 0;
+  border-bottom: 1px solid var(--wc-line);
+  min-width: 0;
+}
+
+.factLabel {
+  font: var(--wc-t-small);
+  color: var(--wc-text-muted);
+  min-width: 0;
+}
+
+.factValue {
+  margin: 0;
+  font: var(--wc-t-body);
+  color: var(--wc-text);
+  text-align: right;
+  min-width: 0;
+}

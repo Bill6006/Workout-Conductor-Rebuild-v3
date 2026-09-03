@@ -172,7 +172,13 @@ describe('App — locked product decision', () => {
 
     for (const path of ROUTES) {
       await renderAppAt(path, seededRepository(setUpProfile()))
-      const lengthControls = screen.queryAllByRole('button', { name: /workout length/i })
+      // Phase 3 turned this from a disabled button into a real dropdown, so both
+      // roles are counted: the invariant is "exactly one workout-length control
+      // in the whole app", not "one button".
+      const lengthControls = [
+        ...screen.queryAllByRole('combobox', { name: /workout length/i }),
+        ...screen.queryAllByRole('button', { name: /workout length/i }),
+      ]
 
       expect(lengthControls.length, `route ${path} must not add a second length control`).toBeLessThanOrEqual(
         1,

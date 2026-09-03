@@ -18,7 +18,7 @@ in your browser, works offline, and installs to a phone home screen as a PWA.
 
 ## Status
 
-**Phase 2 — Exercise Catalog, Media, and Conflict Engine (awaiting review).**
+**Phase 3 — Workout Generation and Duration Engine (awaiting review).**
 
 What exists today is a real early product: an eight-step setup, a durable local profile in
 IndexedDB with Zod validation and a verified write / read-back / compare save path, fully
@@ -30,7 +30,11 @@ structured metadata, a muscle and movement-pattern vocabulary, a conflict engine
 alternative-ranking foundation. Exercise preferences are now picked from that catalog rather
 than typed.
 
-What does not exist yet is the training intelligence. There is no workout engine, so Start
+Phase 3 added the engine. Today now builds a real session for your goals, equipment,
+location, and the time you have, and the one workout-length control works — choosing
+15 / 30 / 45 / Default rebuilds the session for that time rather than trimming a longer one.
+
+What does not exist yet is running the session. There is no set logger and no rest timer, so Start
 Workout is disabled and says so; the session shown on Today is a static, clearly labelled
 sample that is never saved and never counted as training. The workout-length control shows
 your default duration but is deliberately inert until Phase 3, when it becomes the working
@@ -112,8 +116,8 @@ Nine phases. Each one ends at a review gate.
 
 - [x] **Phase 0 — Repository, Live Pages, and Scaffold** — GREEN, 2026-09-01
 - [x] **Phase 1 — Product Foundation and First Useful Live Preview** — GREEN, 2026-09-01
-- [~] **Phase 2 — Exercise Catalog, Media, and Conflict Engine** — in review
-- [ ] **Phase 3 — Workout Generation and Duration Engine**
+- [x] **Phase 2 — Exercise Catalog, Media, and Conflict Engine** — GREEN, 2026-09-02
+- [~] **Phase 3 — Workout Generation and Duration Engine** — in review
 - [ ] **Phase 4 — Central Recalibration Engine**
 - [ ] **Phase 5 — Active Workout, Logging, and Superset Experience**
 - [ ] **Phase 6 — Adaptive Coach, Progression, Strategy, and Recovery**

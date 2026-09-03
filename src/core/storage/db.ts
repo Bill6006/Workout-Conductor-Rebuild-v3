@@ -10,10 +10,19 @@ import type { VerifiedStore } from './verifiedSave'
  */
 
 export const DB_NAME = 'workout-conductor'
-export const DB_VERSION = 1
+/**
+ * 1 — Phase 1 baseline: `profile`, `meta`.
+ * 2 — Phase 3: `workouts`, holding generated sessions, indexed by the day they
+ *     are for. Purely additive; nothing in version 1 was touched.
+ */
+export const DB_VERSION = 2
 
 export const PROFILE_STORE = 'profile'
 export const META_STORE = 'meta'
+export const WORKOUT_STORE = 'workouts'
+
+/** The `workouts` index that answers "what was generated for this day?". */
+export const WORKOUTS_BY_DATE_INDEX = 'by-date'
 
 export interface ProfileRecord {
   id: string
@@ -25,11 +34,27 @@ export interface MetaRecord {
   value: unknown
 }
 
+/**
+ * A stored session, as IndexedDB sees it: a key, an indexed date, and the rest.
+ *
+ * Deliberately structural rather than the `GeneratedWorkoutRecord` type. This
+ * layer stores and retrieves; `core/validation/workoutSchema.ts` decides what a
+ * valid session IS, and the validator on the store is what enforces it. Typing
+ * the raw row as the validated shape would claim a guarantee reading gives you.
+ */
+export interface WorkoutRow {
+  id: string
+  forDate: string
+  [key: string]: unknown
+}
+
 export interface WorkoutConductorDB extends DBSchema {
   /** Exactly one row, keyed `'primary'`. */
   profile: { key: string; value: ProfileRecord }
   /** Small durable bookkeeping: last backup time, last migration run, and so on. */
   meta: { key: string; value: MetaRecord }
+  /** One row per generated session, keyed by workout id. */
+  workouts: { key: string; value: WorkoutRow; indexes: { 'by-date': string } }
 }
 
 export type StorageErrorCode =
@@ -111,12 +136,19 @@ export function openAppDatabase(): Promise<IDBPDatabase<WorkoutConductorDB>> {
         db.createObjectStore(META_STORE, { keyPath: 'key' })
       }
 
-      // Phase 3+ extends here. Bump DB_VERSION, then add a new guarded block — the
-      // blocks are cumulative, so a user on version 1 runs every later block in turn:
+      // Version 2 — Phase 3's generated sessions. Additive only: the version 1
+      // stores are untouched, so a user upgrading keeps their profile exactly as
+      // it was and simply gains an empty `workouts` store.
+      if (oldVersion < 2) {
+        const workouts = db.createObjectStore(WORKOUT_STORE, { keyPath: 'id' })
+        workouts.createIndex(WORKOUTS_BY_DATE_INDEX, 'forDate')
+      }
+
+      // A LATER PHASE EXTENDS HERE. Bump DB_VERSION, then add a new guarded block —
+      // the blocks are cumulative, so a user on version 1 runs every later block in
+      // turn:
       //
-      // if (oldVersion < 2) {
-      //   const workouts = db.createObjectStore('workouts', { keyPath: 'id' })
-      //   workouts.createIndex('by-date', 'date')
+      // if (oldVersion < 3) {
       //   const sets = db.createObjectStore('sets', { keyPath: 'id' })
       //   sets.createIndex('by-workout', 'workoutId')
       // }
@@ -175,7 +207,7 @@ export async function closeAppDatabase(): Promise<void> {
   }
 }
 
-type AppStoreName = typeof PROFILE_STORE | typeof META_STORE
+type AppStoreName = typeof PROFILE_STORE | typeof META_STORE | typeof WORKOUT_STORE
 
 /**
  * An IndexedDB-backed `VerifiedStore`. This is the only place the app talks to a
@@ -217,6 +249,54 @@ export function createIdbStore<T>(options: {
         await db.delete(name, key)
       } catch (error) {
         throw storageError('failed', error, `Deleting "${key}" from ${name} failed.`)
+      }
+    },
+  }
+}
+
+/**
+ * READS OVER THE `workouts` INDEX.
+ *
+ * Writes never come through here — every durable write goes through
+ * `saveVerified` on the `VerifiedStore` above. These are the read paths that need
+ * the index, which the narrow `VerifiedStore` interface deliberately does not
+ * expose, and they hand back raw rows for the repository to validate.
+ */
+export interface WorkoutBrowser {
+  /** Every row generated for one calendar day, in insertion order. */
+  byDate(forDate: string): Promise<unknown[]>
+  /** The most recent rows by the day they are FOR, newest first. */
+  recent(limit: number): Promise<unknown[]>
+}
+
+export function createIdbWorkoutBrowser(): WorkoutBrowser {
+  return {
+    async byDate(forDate) {
+      const db = await openAppDatabase()
+      try {
+        return await db.getAllFromIndex(WORKOUT_STORE, WORKOUTS_BY_DATE_INDEX, forDate)
+      } catch (error) {
+        throw storageError('failed', error, `Reading workouts for ${forDate} failed.`)
+      }
+    },
+    async recent(limit) {
+      const db = await openAppDatabase()
+      try {
+        // The index is ascending by `forDate`; walking it backwards from the end
+        // reads only as many rows as were asked for, rather than loading every
+        // session a user has ever generated to take the last few.
+        const rows: unknown[] = []
+        let cursor = await db
+          .transaction(WORKOUT_STORE)
+          .store.index(WORKOUTS_BY_DATE_INDEX)
+          .openCursor(null, 'prev')
+        while (cursor && rows.length < limit) {
+          rows.push(cursor.value)
+          cursor = await cursor.continue()
+        }
+        return rows
+      } catch (error) {
+        throw storageError('failed', error, 'Reading recent workouts failed.')
       }
     },
   }

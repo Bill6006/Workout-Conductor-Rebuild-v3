@@ -1,0 +1,58 @@
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--wc-s-3);
+  min-width: 0;
+  margin-top: var(--wc-s-4);
+}
+
+.label {
+  font: var(--wc-t-body);
+  color: var(--wc-text);
+  min-width: 0;
+}
+
+/*
+ * The chevron sits over a native select rather than replacing it: the platform
+ * picker is one tap on a phone and comes with keyboard and screen-reader
+ * behaviour already correct.
+ */
+.control {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.select {
+  appearance: none;
+  -webkit-appearance: none;
+  min-height: 44px;
+  max-width: 100%;
+  padding: 0 calc(var(--wc-s-6) + var(--wc-s-2)) 0 var(--wc-s-4);
+  border: 1px solid var(--wc-lime-edge);
+  border-radius: var(--wc-r-pill);
+  background: var(--wc-lime-wash);
+  color: var(--wc-text);
+  font: var(--wc-t-body);
+  text-overflow: ellipsis;
+}
+
+.select:disabled {
+  border-color: var(--wc-line);
+  background: var(--wc-surface-2);
+  color: var(--wc-text-muted);
+}
+
+.chevron {
+  position: absolute;
+  right: var(--wc-s-3);
+  color: var(--wc-lime);
+  pointer-events: none;
+}
+
+.select:disabled + .chevron {
+  color: var(--wc-text-muted);
+}

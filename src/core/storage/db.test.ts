@@ -4,6 +4,8 @@ import {
   DB_VERSION,
   META_STORE,
   PROFILE_STORE,
+  WORKOUTS_BY_DATE_INDEX,
+  WORKOUT_STORE,
   StorageError,
   closeAppDatabase,
   isIndexedDbAvailable,
@@ -34,9 +36,11 @@ afterEach(async () => {
 describe('database identity', () => {
   it('is the names and version the rest of the app expects', () => {
     expect(DB_NAME).toBe('workout-conductor')
-    expect(DB_VERSION).toBe(1)
+    expect(DB_VERSION).toBe(2)
     expect(PROFILE_STORE).toBe('profile')
     expect(META_STORE).toBe('meta')
+    expect(WORKOUT_STORE).toBe('workouts')
+    expect(WORKOUTS_BY_DATE_INDEX).toBe('by-date')
   })
 })
 

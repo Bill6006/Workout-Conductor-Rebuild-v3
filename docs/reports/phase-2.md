@@ -1,6 +1,6 @@
 # Phase 2 — Exercise Catalog, Media, and Conflict Engine
 
-**Status: YELLOW — submitted for review.**
+**Status: GREEN — approved by the owner on 2026-09-02.**
 
 |              |                                                                                                      |
 | ------------ | ---------------------------------------------------------------------------------------------------- |
@@ -223,10 +223,12 @@ say so and I will.
 The owner reviews the live app and records one of `GREEN - NEXT PHASE`,
 `YELLOW - FIX: <issue>`, or `RED - STOP`. This phase does not advance itself.
 
-**Decision:**
+**Decision:** `GREEN - NEXT PHASE`
 
-**Reviewed by:**
+**Reviewed by:** the project owner, on the deployed Pages build
 
-**Date:**
+**Date:** 2026-09-02
 
-**Notes:**
+**Notes:** Approved without change requests. The exercise-demonstration decision above
+remains open and is carried forward to Phase 8. Phase 3 — Workout Generation and Duration
+Engine — follows.

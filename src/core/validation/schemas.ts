@@ -23,8 +23,12 @@ export const SCHEMA_VERSION = 2
  * Strips the `[key: string]: unknown` carry-through slot that `z.looseObject`
  * adds to its inferred type, so consumers get exact object types (a typo in a
  * patch is a compile error) while the runtime value still carries unknown keys.
+ *
+ * Exported because `workoutSchema.ts` is built the same way and needs the same
+ * treatment. One helper, not two: a second copy would drift the day this one is
+ * taught about a new exotic type.
  */
-type KnownFields<T> = T extends readonly (infer U)[]
+export type KnownFields<T> = T extends readonly (infer U)[]
   ? KnownFields<U>[]
   : T extends object
     ? { [K in keyof T as string extends K ? never : K]: KnownFields<T[K]> }
