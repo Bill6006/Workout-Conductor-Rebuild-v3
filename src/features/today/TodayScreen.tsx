@@ -129,6 +129,17 @@ export function TodayScreen() {
   const trainingToday = profile ? profile.schedule.availableDays.includes(weekdayKey(today)) : false
   const place = profile ? activeLocation(profile) : null
 
+  const waitingCard = profile ? (
+    <SessionCard
+      profile={profile}
+      trainingToday={trainingToday}
+      status={session.status === 'ready' ? 'loading' : session.status}
+      message={session.message}
+      choice={session.choice}
+      onChoose={session.setChoice}
+    />
+  ) : null
+
   return (
     <div className={styles.screen}>
       <ScreenHeader
@@ -144,7 +155,13 @@ export function TodayScreen() {
       {!profile ? (
         <EmptySessionCard unavailable={status === 'error'} />
       ) : session.status === 'ready' && session.workout ? (
-        <Suspense fallback={null}>
+        /*
+         * The waiting card IS the suspense fallback, not `null`. The one
+         * workout-length control must never blink out of existence while the
+         * session card's chunk loads — CI caught exactly that, and a control
+         * that vanishes for a frame is a control a thumb can miss.
+         */
+        <Suspense fallback={waitingCard}>
           <GeneratedSessionCard
             workout={session.workout}
             choice={session.choice}
@@ -156,14 +173,7 @@ export function TodayScreen() {
           />
         </Suspense>
       ) : (
-        <SessionCard
-          profile={profile}
-          trainingToday={trainingToday}
-          status={session.status as Exclude<WorkoutStatus, 'ready'>}
-          message={session.message}
-          choice={session.choice}
-          onChoose={session.setChoice}
-        />
+        waitingCard
       )}
 
       <section className={styles.group}>

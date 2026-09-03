@@ -188,6 +188,21 @@ describe('TodayScreen', () => {
   })
 
   describe('the locked workout-length decision', () => {
+    it('is on screen from the first paint and never blinks out', async () => {
+      // CI caught this: the generated card is a lazy chunk, and with a `null`
+      // suspense fallback the one length control vanished for the frames between
+      // the waiting card unmounting and the session card mounting. A control a
+      // thumb can miss is a broken control, so it must be present synchronously
+      // and still present once the session arrives.
+      renderToday(seededRepository(completedProfile()))
+      expect(screen.getByLabelText(/workout length/i)).toBeInTheDocument()
+
+      await waitFor(() => {
+        expect(screen.getByLabelText(/workout length/i)).toBeInTheDocument()
+      })
+      expect(screen.getAllByLabelText(/workout length/i)).toHaveLength(1)
+    })
+
     it('exposes exactly one workout-length control', async () => {
       renderToday(seededRepository(completedProfile()))
       await screen.findByLabelText(/workout length/i)
