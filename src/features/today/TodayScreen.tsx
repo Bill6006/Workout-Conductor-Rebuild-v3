@@ -4,7 +4,9 @@ import { PrimaryAction } from '../../components/PrimaryAction'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { SectionHeading } from '../../components/SectionHeading'
 import { StatTile } from '../../components/StatTile'
-import { Suspense, lazy } from 'react'
+import { Suspense, lazy, useCallback, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useActiveSession } from '../workout/useActiveSession'
 import { CalibrationOverlay } from '../../components/CalibrationOverlay'
 import { useProfile } from '../../core/state'
 import { nowIso } from '../../core/time/clock'
@@ -123,8 +125,26 @@ function EmptySessionCard({ unavailable }: { unavailable: boolean }) {
 }
 
 export function TodayScreen() {
+  const navigate = useNavigate()
   const { profile, status } = useProfile()
   const session = useGeneratedWorkout(profile)
+  const active = useActiveSession()
+  const [starting, setStarting] = useState(false)
+
+  /**
+   * Starting a session hands the generated workout to the active-session store,
+   * which persists it before the Workout tab opens. If the save fails the person
+   * stays on Today with the session unstarted, rather than arriving at a screen
+   * backed by nothing.
+   */
+  const startSession = useCallback(() => {
+    if (!session.workout) return
+    setStarting(true)
+    void active
+      .start(session.workout)
+      .then(() => navigate('/workout'))
+      .finally(() => setStarting(false))
+  }, [active, navigate, session.workout])
 
   const today = new Date(nowIso())
   const trainingToday = profile ? profile.schedule.availableDays.includes(weekdayKey(today)) : false
@@ -170,6 +190,8 @@ export function TodayScreen() {
             rebuilding={session.rebuilding}
             nameOf={session.nameOf}
             lastChange={session.lastChange}
+            onStart={startSession}
+            starting={starting}
             locationName={activeLocation(profile).name}
             trainingStyleLabel={TRAINING_STYLE_LABEL[profile.trainingStyle]}
           />

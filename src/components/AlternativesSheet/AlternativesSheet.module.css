@@ -1,0 +1,342 @@
+/*
+ * AlternativesSheet — a swap list read one-handed, mid-set, tired.
+ *
+ * Every row is a 56px-minimum target and every line wraps rather than clips:
+ * exercise names, equipment lists and the ranker's sentences are all variable
+ * length, and the app ships no web font, so the same string is measurably wider
+ * in Verdana or DejaVu Sans than in the design's Inter. Nothing here is sized so
+ * tightly that a wider fallback would truncate it.
+ */
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-2);
+  min-width: 0;
+}
+
+.mediaNote {
+  padding: var(--wc-s-2) var(--wc-s-3);
+  border: 1px solid var(--wc-line);
+  border-radius: var(--wc-r-sm);
+  background: var(--wc-bg-elevated);
+  color: var(--wc-text-faint);
+  font: var(--wc-t-small);
+  font-size: clamp(11px, 3.4vw, 13px);
+  overflow-wrap: break-word;
+}
+
+.groupHeading {
+  margin-top: var(--wc-s-2);
+  color: var(--wc-text-muted);
+  font: var(--wc-t-label);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-2);
+  min-width: 0;
+}
+
+.item {
+  min-width: 0;
+}
+
+/* ------------------------------------------------------------------- a row */
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--wc-s-3);
+  width: 100%;
+  /* A gym target, not a list line. */
+  min-height: 56px;
+  padding: var(--wc-s-3) clamp(10px, 3.5vw, 14px);
+  border: 1px solid var(--wc-line);
+  border-radius: var(--wc-r-lg);
+  background: var(--wc-surface-2);
+  color: var(--wc-text);
+  text-align: left;
+  transition:
+    background-color var(--wc-dur-fast) var(--wc-ease),
+    border-color var(--wc-dur-fast) var(--wc-ease),
+    transform var(--wc-dur-fast) var(--wc-ease);
+}
+
+.row:not(:disabled):hover {
+  background: var(--wc-surface-3);
+}
+
+.row:not(:disabled):active {
+  transform: scale(0.99);
+}
+
+.row:disabled {
+  cursor: not-allowed;
+  color: var(--wc-text-faint);
+}
+
+/* The strongest match, presented as one: lifted, edged, and badged. */
+.best {
+  padding: var(--wc-s-4) clamp(12px, 4vw, 16px);
+  border-color: var(--wc-lime-edge);
+  background: linear-gradient(180deg, var(--wc-lime-wash), transparent 62%), var(--wc-surface-2);
+}
+
+.best:not(:disabled):hover {
+  background: linear-gradient(180deg, var(--wc-lime-wash), transparent 62%), var(--wc-surface-3);
+}
+
+/* ----------------------------------------------------------------- poster */
+
+.thumb {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: clamp(44px, 15vw, 76px);
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid var(--wc-line);
+  border-radius: var(--wc-r-sm);
+  background: var(--wc-surface-3);
+}
+
+.best .thumb {
+  width: clamp(56px, 21vw, 104px);
+}
+
+.poster {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.monogram {
+  color: var(--wc-text-muted);
+  font: var(--wc-t-heading);
+  text-transform: uppercase;
+}
+
+/* ------------------------------------------------------------- row content */
+
+.rowBody {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--wc-s-1);
+  min-width: 0;
+}
+
+/*
+ * Name and score share a line while both fit; at 240 CSS px the score wraps
+ * onto its own line rather than squeezing the name into two characters.
+ */
+.rowTop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--wc-s-1) var(--wc-s-2);
+  min-width: 0;
+}
+
+.badge {
+  flex: 1 0 100%;
+  margin-bottom: var(--wc-s-1);
+}
+
+.name {
+  flex: 1 1 auto;
+  min-width: 0;
+  font: var(--wc-t-heading);
+  font-size: clamp(15px, 4.6vw, 17px);
+  overflow-wrap: break-word;
+}
+
+.best .name {
+  font-size: clamp(17px, 5.2vw, 20px);
+}
+
+.score {
+  display: inline-flex;
+  flex: none;
+  align-items: baseline;
+  gap: 2px;
+  color: var(--wc-lime);
+  white-space: nowrap;
+}
+
+.scoreValue {
+  font: 700 clamp(17px, 5.4vw, 21px) / 1.1 var(--wc-font-num);
+}
+
+.best .scoreValue {
+  font-size: clamp(21px, 6.6vw, 26px);
+}
+
+.scoreUnit {
+  font: var(--wc-t-small);
+  font-size: clamp(11px, 3.4vw, 13px);
+  color: var(--wc-lime-deep);
+}
+
+.detail {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.quality {
+  color: var(--wc-text-muted);
+  font: var(--wc-t-label);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.reason {
+  color: var(--wc-text-soft);
+  font: var(--wc-t-small);
+  font-size: clamp(12px, 3.9vw, 14px);
+  overflow-wrap: break-word;
+}
+
+.difference,
+.meta,
+.supersetNote {
+  color: var(--wc-text-muted);
+  font: var(--wc-t-small);
+  font-size: clamp(11px, 3.6vw, 13px);
+  overflow-wrap: break-word;
+}
+
+.supersetNote {
+  color: var(--wc-text-soft);
+}
+
+.warning {
+  color: var(--wc-warn);
+  font: var(--wc-t-small);
+  font-size: clamp(11px, 3.6vw, 13px);
+  overflow-wrap: break-word;
+}
+
+/* -------------------------------------------------------------------- flags */
+
+.flags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--wc-s-1);
+  margin-top: var(--wc-s-1);
+  min-width: 0;
+}
+
+/*
+ * Chips wrap and are never truncated: "Breaks the superset" is exactly the
+ * sentence a tired person must not have to guess at from an ellipsis.
+ */
+.flag {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border: 1px solid transparent;
+  border-radius: var(--wc-r-pill);
+  font: var(--wc-t-small);
+  font-size: clamp(11px, 3.4vw, 12px);
+  line-height: 1.3;
+  overflow-wrap: break-word;
+}
+
+.good {
+  border-color: color-mix(in srgb, var(--wc-ok) 34%, transparent);
+  background: color-mix(in srgb, var(--wc-ok) 12%, transparent);
+  color: var(--wc-ok);
+}
+
+.caution {
+  border-color: color-mix(in srgb, var(--wc-warn) 34%, transparent);
+  background: color-mix(in srgb, var(--wc-warn) 12%, transparent);
+  color: var(--wc-warn);
+}
+
+.warn {
+  border-color: color-mix(in srgb, var(--wc-danger) 40%, transparent);
+  background: color-mix(in srgb, var(--wc-danger) 14%, transparent);
+  color: var(--wc-danger);
+}
+
+/* --------------------------------------------------- nothing suitable at all */
+
+.none {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-2);
+  padding: var(--wc-s-4);
+  border: 1px solid var(--wc-line-strong);
+  border-radius: var(--wc-r-lg);
+  background: var(--wc-bg-elevated);
+  min-width: 0;
+}
+
+.noneHeading {
+  font: var(--wc-t-heading);
+  font-size: clamp(15px, 4.8vw, 18px);
+  color: var(--wc-text);
+  overflow-wrap: break-word;
+}
+
+.noneMessage {
+  color: var(--wc-text-soft);
+  font: var(--wc-t-body);
+  font-size: clamp(13px, 4.1vw, 15px);
+  overflow-wrap: break-word;
+}
+
+.noneCount,
+.ruledOutText {
+  color: var(--wc-text-faint);
+  font: var(--wc-t-small);
+  font-size: clamp(11px, 3.6vw, 13px);
+  overflow-wrap: break-word;
+}
+
+.noneSubheading {
+  margin-top: var(--wc-s-1);
+  color: var(--wc-text-muted);
+  font: var(--wc-t-label);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ruledOut {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-2);
+  min-width: 0;
+}
+
+.ruledOutItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ruledOutName {
+  color: var(--wc-text-soft);
+  font: var(--wc-t-small);
+  font-size: clamp(12px, 3.8vw, 13px);
+  overflow-wrap: break-word;
+}
+
+/* The one movement here is the press-down; a reduced-motion user asked for none. */
+@media (prefers-reduced-motion: reduce) {
+  .row:not(:disabled):active {
+    transform: none;
+  }
+}

@@ -177,6 +177,32 @@ async function finishSetup(page, baseUrl, problems) {
   await page.waitForTimeout(SETTLE_MS)
 }
 
+/** Start a session and photograph it with a set logged. */
+async function captureActiveWorkout(page, baseUrl, out, profileName, fullPage, problems) {
+  const written = []
+  await openTab(page, baseUrl, '#/', problems)
+
+  const start = page.getByRole('button', { name: /^Start Workout$/ })
+  if ((await start.count()) === 0) return written
+  await start.first().click()
+
+  const logButton = page.getByTestId('log-set')
+  await logButton.waitFor({ state: 'visible', timeout: 20_000 }).catch(() => {})
+  if ((await logButton.count()) === 0) return written
+
+  const first = outPath(out, `${profileName}-workout-active.png`)
+  await page.screenshot({ path: first, fullPage, type: 'png', animations: 'disabled' })
+  written.push(first)
+
+  await logButton.click()
+  await page.waitForTimeout(SETTLE_MS)
+  const logged = outPath(out, `${profileName}-workout-logged.png`)
+  await page.screenshot({ path: logged, fullPage, type: 'png', animations: 'disabled' })
+  written.push(logged)
+
+  return written
+}
+
 async function captureProfile(browser, profile, { baseUrl, out, fullPage }) {
   const context = await browser.newContext({
     viewport: { width: profile.width, height: profile.height },
@@ -205,6 +231,11 @@ async function captureProfile(browser, profile, { baseUrl, out, fullPage }) {
       await page.screenshot({ path: file, fullPage, type: 'png', animations: 'disabled' })
       written.push(file)
     }
+
+    // From Phase 5 the Workout tab only has something to show once a session is
+    // running, and a screenshot of the empty state is not evidence the logger
+    // works. Start one and photograph it mid-set.
+    written.push(...(await captureActiveWorkout(page, baseUrl, out, profile.name, fullPage, problems)))
   } finally {
     await context.close()
   }

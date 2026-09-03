@@ -1,6 +1,6 @@
 # Phase 4 — Central Recalibration Engine
 
-**Status: YELLOW — submitted for review.**
+**Status: GREEN — approved by the owner on 2026-09-03.**
 
 |              |                                                                                                      |
 | ------------ | ---------------------------------------------------------------------------------------------------- |
@@ -166,10 +166,11 @@ should say what actually moved, and the session under it should match that sente
 The owner reviews the live app and records one of `GREEN - NEXT PHASE`,
 `YELLOW - FIX: <issue>`, or `RED - STOP`. This phase does not advance itself.
 
-**Decision:**
+**Decision:** `GREEN - NEXT PHASE`
 
-**Reviewed by:**
+**Reviewed by:** the project owner, on the deployed Pages build
 
-**Date:**
+**Date:** 2026-09-03
 
-**Notes:**
+**Notes:** Approved without change requests. Phase 5 — Active Workout, Logging, and Superset
+Experience — follows.

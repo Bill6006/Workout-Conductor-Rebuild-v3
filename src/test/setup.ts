@@ -50,5 +50,15 @@ vi.mock('virtual:pwa-register/react', () => ({
 }))
 
 afterEach(() => {
+  // The app deliberately remembers an in-progress session across reloads, which
+  // means one test's session would otherwise resume inside the next one. Clear
+  // the whole namespace rather than a known key, so a new setting cannot quietly
+  // start leaking later.
+  try {
+    localStorage.clear()
+  } catch {
+    /* A test may have replaced localStorage with a throwing stub; that is fine. */
+  }
+
   cleanup()
 })

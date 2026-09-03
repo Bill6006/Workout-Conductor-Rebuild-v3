@@ -27,8 +27,11 @@ const SettingsScreen = lazy(() =>
   import('../features/settings/SettingsScreen').then((module) => ({ default: module.SettingsScreen })),
 )
 import { TodayScreen } from '../features/today/TodayScreen'
+// The Workout tab is the active session now, not the Phase 0 placeholder.
 const WorkoutScreen = lazy(() =>
-  import('../features/workout/WorkoutScreen').then((module) => ({ default: module.WorkoutScreen })),
+  import('../features/workout/ActiveWorkoutScreen').then((module) => ({
+    default: module.ActiveWorkoutScreen,
+  })),
 )
 import { AppShell } from './AppShell'
 import {

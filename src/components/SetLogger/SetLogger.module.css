@@ -1,0 +1,111 @@
+.logger {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-3);
+  padding: var(--wc-s-4);
+  border: 1px solid var(--wc-lime-edge);
+  border-radius: var(--wc-r-lg);
+  background: var(--wc-surface-2);
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--wc-s-3);
+  min-width: 0;
+}
+
+/* The current set is unmistakable: it is the only thing at title size. */
+.setNumber {
+  font: var(--wc-t-title);
+  color: var(--wc-text);
+}
+
+.of {
+  font: var(--wc-t-small);
+  color: var(--wc-text-muted);
+}
+
+.targetText {
+  font: var(--wc-t-small);
+  color: var(--wc-text-muted);
+  text-align: right;
+  min-width: 0;
+}
+
+.previous {
+  margin: 0;
+  font: var(--wc-t-small);
+  color: var(--wc-text-faint);
+}
+
+/*
+ * Three values, equally sized because they are equally important, but each is a
+ * large single target rather than a pair of nudge buttons.
+ */
+.values {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+  gap: var(--wc-s-2);
+}
+
+.value {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-height: 72px;
+  padding: var(--wc-s-2);
+  border: 1px solid var(--wc-line-strong);
+  border-radius: var(--wc-r-md);
+  background: var(--wc-surface);
+}
+
+.valueNumber {
+  font: 700 clamp(22px, 7vw, 30px) / 1.05 var(--wc-font);
+  color: var(--wc-text);
+}
+
+.valueLabel {
+  font: var(--wc-t-label);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--wc-text-muted);
+}
+
+.actions {
+  display: flex;
+  gap: var(--wc-s-2);
+}
+
+/*
+ * The one big control on the row. Nothing else is lime, so a thumb reaching for
+ * "done" cannot land on anything destructive.
+ */
+.log {
+  flex: 1 1 auto;
+  min-height: 56px;
+  border-radius: var(--wc-r-pill);
+  background: var(--wc-lime);
+  color: var(--wc-lime-ink);
+  font: 700 17px / 1.2 var(--wc-font);
+  box-shadow: var(--wc-shadow-lime);
+}
+
+.log:disabled {
+  background: var(--wc-surface-3);
+  color: var(--wc-text-muted);
+  box-shadow: none;
+}
+
+.undo {
+  flex: 0 0 auto;
+  min-width: 72px;
+  min-height: 56px;
+  padding: 0 var(--wc-s-4);
+  border: 1px solid var(--wc-line-strong);
+  border-radius: var(--wc-r-pill);
+  color: var(--wc-text-soft);
+  font: var(--wc-t-body);
+}

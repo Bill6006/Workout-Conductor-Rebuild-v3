@@ -1,0 +1,127 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-4);
+  padding: var(--wc-s-4);
+  border: 1px solid var(--wc-line);
+  border-radius: var(--wc-r-xl);
+  background: var(--wc-surface);
+  box-shadow: var(--wc-shadow-card);
+}
+
+.supersetHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--wc-s-3);
+}
+
+.rounds {
+  font: var(--wc-t-small);
+  color: var(--wc-text-muted);
+}
+
+.moves {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-3);
+}
+
+.move,
+.moveActive {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-2);
+  padding: var(--wc-s-3);
+  border-radius: var(--wc-r-md);
+  min-width: 0;
+}
+
+/* The move being performed is the one that reads as current. */
+.moveActive {
+  border: 1px solid var(--wc-lime-edge);
+  background: var(--wc-lime-wash);
+}
+
+.move {
+  border: 1px solid var(--wc-line);
+  background: var(--wc-surface-2);
+}
+
+.moveHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--wc-s-2);
+  min-width: 0;
+}
+
+.moveName {
+  flex: 1 1 auto;
+  min-height: 44px;
+  text-align: left;
+  font: var(--wc-t-heading);
+  color: var(--wc-text);
+  min-width: 0;
+}
+
+.swap {
+  flex: none;
+  min-height: 44px;
+  min-width: 60px;
+  padding: 0 var(--wc-s-3);
+  border: 1px solid var(--wc-line-strong);
+  border-radius: var(--wc-r-pill);
+  color: var(--wc-text-soft);
+  font: var(--wc-t-small);
+}
+
+.completed {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--wc-s-2);
+}
+
+.doneSet,
+.skipped {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--wc-s-2);
+  min-height: 44px;
+  padding: 0 var(--wc-s-3);
+  border-radius: var(--wc-r-pill);
+  font: var(--wc-t-small);
+}
+
+.doneSet {
+  border: 1px solid var(--wc-lime-edge);
+  background: var(--wc-lime-wash);
+  color: var(--wc-text);
+}
+
+.skipped {
+  border: 1px dashed var(--wc-line-strong);
+  color: var(--wc-text-muted);
+}
+
+.doneIndex {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--wc-r-pill);
+  background: var(--wc-lime);
+  color: var(--wc-lime-ink);
+  font: 700 11px / 1 var(--wc-font);
+}
+
+.doneValue {
+  min-width: 0;
+}
+
+.done {
+  margin: 0;
+  font: var(--wc-t-body);
+  color: var(--wc-text-muted);
+}

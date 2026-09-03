@@ -80,13 +80,18 @@ test('says how long the session is expected to take', async ({ page }) => {
   await expect(page.getByText(/About \d+ min/)).toBeVisible()
 })
 
-test('cannot start a session yet, and says why', async ({ page }) => {
+test('the one start control is present and now starts a session', async ({ page }) => {
   await openToday(page)
 
+  // Phase 5 turned this on. It is still the ONLY start control in the app —
+  // src/app/App.test.tsx fails the build if a second one appears.
   const start = page.getByRole('button', { name: 'Start Workout' })
   await expect(start).toHaveCount(1)
-  await expect(start).toBeDisabled()
-  await expect(page.getByText(/Phase 5/).first()).toBeVisible()
+  await expect(start).toBeEnabled()
+
+  await start.click()
+  await expect(page.getByRole('heading', { level: 1, name: 'Workout' })).toBeVisible()
+  await expect(page.getByTestId('log-set')).toBeVisible({ timeout: 20_000 })
 })
 
 test('explains the session in terms of the profile it was built from', async ({ page }) => {

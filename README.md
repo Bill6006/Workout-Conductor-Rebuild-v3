@@ -18,7 +18,7 @@ in your browser, works offline, and installs to a phone home screen as a PWA.
 
 ## Status
 
-**Phase 4 — Central Recalibration Engine (awaiting review).**
+**Phase 5 — Active Workout, Logging, and Superset Experience (awaiting review).**
 
 What exists today is a real early product: an eight-step setup, a durable local profile in
 IndexedDB with Zod validation and a verified write / read-back / compare save path, fully
@@ -38,7 +38,12 @@ Phase 4 added the recalibration engine behind that control: changing the length 
 one engine that decides what may change, protects anything already logged, and tells you what
 it did.
 
-What does not exist yet is running the session. There is no set logger and no rest timer, so Start
+Phase 5 made it usable in a gym: Start Workout runs the session, sets are logged one-handed,
+a completed set is tappable to correct, the rest timer runs off a timestamp so backgrounding
+cannot lose it, and closing the app mid-workout and reopening puts you back exactly where you
+were.
+
+What does not exist yet is the coaching. There is no progression from history, so Start
 Workout is disabled and says so; the session shown on Today is a static, clearly labelled
 sample that is never saved and never counted as training. The workout-length control shows
 your default duration but is deliberately inert until Phase 3, when it becomes the working
@@ -122,8 +127,8 @@ Nine phases. Each one ends at a review gate.
 - [x] **Phase 1 — Product Foundation and First Useful Live Preview** — GREEN, 2026-09-01
 - [x] **Phase 2 — Exercise Catalog, Media, and Conflict Engine** — GREEN, 2026-09-02
 - [x] **Phase 3 — Workout Generation and Duration Engine** — GREEN, 2026-09-03
-- [~] **Phase 4 — Central Recalibration Engine** — in review
-- [ ] **Phase 5 — Active Workout, Logging, and Superset Experience**
+- [x] **Phase 4 — Central Recalibration Engine** — GREEN, 2026-09-03
+- [~] **Phase 5 — Active Workout, Logging, and Superset Experience** — in review
 - [ ] **Phase 6 — Adaptive Coach, Progression, Strategy, and Recovery**
 - [ ] **Phase 7 — Progress, Plan, Coverage, PRs, and Session Summary**
 - [ ] **Phase 8 — Data Safety, Optional Migration, PWA, Polish, and Acceptance**

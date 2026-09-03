@@ -31,6 +31,8 @@ interface SessionCardProps {
   readonly nameOf: (exerciseId: string) => string | null
   /** What the last length change did, shown once so it registers as a change. */
   readonly lastChange: ChangeSummary | null
+  readonly onStart: () => void
+  readonly starting?: boolean
   /** Where they are training and how they train — carried over from the profile card. */
   readonly locationName: string
   readonly trainingStyleLabel: string
@@ -54,6 +56,8 @@ export function SessionCard({
   lastChange,
   locationName,
   trainingStyleLabel,
+  onStart,
+  starting = false,
 }: SessionCardProps) {
   const rows = workoutListRows(workout, nameOf)
   const overruns = workout.estimatedMinutes > workout.plannedMinutes
@@ -101,8 +105,9 @@ export function SessionCard({
         ))}
       </ol>
 
-      <PrimaryAction disabled>Start Workout</PrimaryAction>
-      <p className={styles.caption}>Logging a session arrives in Phase 5, so this cannot start one yet.</p>
+      <PrimaryAction onClick={onStart} disabled={starting}>
+        {starting ? 'Starting…' : 'Start Workout'}
+      </PrimaryAction>
     </Card>
   )
 }

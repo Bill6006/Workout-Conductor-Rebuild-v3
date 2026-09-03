@@ -97,8 +97,12 @@ function mountAppAt(path: string, repository: ProfileRepository) {
 /** Mounts and waits for the profile to finish hydrating. */
 async function renderAppAt(path: string, repository: ProfileRepository) {
   mountAppAt(path, repository)
-  await waitFor(() =>
-    expect(screen.queryByRole('heading', { level: 1, name: 'Loading' })).not.toBeInTheDocument(),
+  // Hydration is a real async read, and the default one-second budget is tight
+  // when the whole suite is running: this timed out in a full run while passing
+  // in isolation, which is the signature of a loaded machine rather than a bug.
+  await waitFor(
+    () => expect(screen.queryByRole('heading', { level: 1, name: 'Loading' })).not.toBeInTheDocument(),
+    { timeout: 5000 },
   )
 }
 

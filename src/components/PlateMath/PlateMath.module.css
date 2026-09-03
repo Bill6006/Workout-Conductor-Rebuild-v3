@@ -1,0 +1,47 @@
+/*
+ * Read mid-set, one-handed, out of breath. The headline is the only thing that
+ * has to survive a glance, so it is the largest thing here and everything else
+ * steps down from it. No animation: nothing in this readout moves.
+ */
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-1);
+  min-width: 0;
+  padding: var(--wc-s-3) var(--wc-s-4);
+  border: 1px solid var(--wc-line);
+  border-radius: var(--wc-r-md);
+  background: var(--wc-surface-2);
+}
+
+.headline,
+.flag,
+.detail {
+  margin: 0;
+  /*
+   * The equation is a run of numbers joined by "+", which has no break
+   * opportunity of its own. At 240 CSS px (360 at 150% zoom) a 6-plate side would
+   * push the card sideways, so the line is allowed to wrap anywhere it must.
+   */
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+
+.headline {
+  font: var(--wc-t-heading);
+  font-family: var(--wc-font-num);
+  color: var(--wc-text);
+  /* Numbers set slightly open read faster than tight ones on a phone at arm's length. */
+  letter-spacing: 0.01em;
+}
+
+.flag {
+  font: var(--wc-t-small);
+  color: var(--wc-warn);
+}
+
+.detail {
+  font: var(--wc-t-small);
+  color: var(--wc-text-muted);
+}

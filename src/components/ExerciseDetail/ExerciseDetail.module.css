@@ -1,0 +1,279 @@
+/*
+ * The exercise sheet. Read one-handed, mid-set, on a phone.
+ *
+ * Every block here is width-safe at 240 CSS px (a 360 px phone at 150 % zoom):
+ * prose wraps rather than nowraps, nothing is a fixed pixel width, and every
+ * grid track that holds text is `minmax(0, …)` so a long word shrinks the track
+ * instead of pushing the sheet sideways.
+ */
+
+/* ------------------------------------------------------------------ media */
+
+.media {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-2);
+  min-width: 0;
+  margin: 0;
+}
+
+/*
+ * The box is reserved before anything loads: a fixed 16:9 frame, capped by
+ * viewport height so the picture never eats the sheet on a short screen. The
+ * image is `contain`, so an asset of another shape letterboxes inside the frame
+ * rather than reflowing everything under it.
+ */
+.frame {
+  width: 100%;
+  max-width: calc(34dvh * 16 / 9);
+  aspect-ratio: 16 / 9;
+  margin-inline: auto;
+  overflow: hidden;
+  border: 1px solid var(--wc-line);
+  border-radius: var(--wc-r-md);
+  background: var(--wc-surface-2);
+}
+
+.poster {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/*
+ * Two lines are reserved for the caption, because the sentence it holds arrives
+ * with the manifest rather than with the first paint. Reserving it is the
+ * difference between the sheet settling once and the text under it stepping
+ * down while somebody is reading it.
+ */
+.caption {
+  min-height: calc(2 * 1.4em);
+  font: var(--wc-t-small);
+  color: var(--wc-text-muted);
+  overflow-wrap: anywhere;
+}
+
+/* ------------------------------------------------------------------ facts */
+
+.facts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-2);
+  min-width: 0;
+  margin: 0;
+  padding: var(--wc-s-3);
+  border: 1px solid var(--wc-line);
+  border-radius: var(--wc-r-md);
+  background: var(--wc-surface-2);
+}
+
+/*
+ * Term and detail sit side by side while there is room and stack below it. The
+ * term column is capped in `ch` rather than pixels so it follows whatever font
+ * the device actually resolved — Roboto, DejaVu Sans, Segoe UI or Verdana.
+ */
+.fact {
+  display: grid;
+  grid-template-columns: minmax(0, 11ch) minmax(0, 1fr);
+  gap: var(--wc-s-1) var(--wc-s-3);
+  min-width: 0;
+}
+
+@media (max-width: 319px) {
+  .fact {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.factTerm {
+  font: var(--wc-t-small);
+  color: var(--wc-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.factDetail {
+  margin: 0;
+  font: var(--wc-t-small);
+  color: var(--wc-text);
+  overflow-wrap: anywhere;
+}
+
+/* --------------------------------------------------------------- sections */
+
+/*
+ * A hairline above each section, rather than a wider gap. The sheet's own body
+ * spacing is 12 px and blocks of prose at that distance run together when read
+ * in a hurry; a rule is cheaper than the vertical space a phone does not have.
+ */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-3);
+  min-width: 0;
+  padding-top: var(--wc-s-4);
+  border-top: 1px solid var(--wc-line);
+}
+
+.heading {
+  font: var(--wc-t-heading);
+  color: var(--wc-text);
+  overflow-wrap: anywhere;
+}
+
+/* ------------------------------------------------------------------ steps */
+
+/*
+ * `role="list"` is required of every list in this app, and the global sheet
+ * strips the marker from anything carrying it — so the step number is drawn
+ * here as a counter. The semantics come from the `<ol>`, the numerals from CSS,
+ * and neither depends on the other.
+ */
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-3);
+  min-width: 0;
+  counter-reset: step;
+}
+
+.step {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: var(--wc-s-3);
+  align-items: start;
+  min-width: 0;
+  font: var(--wc-t-body);
+  color: var(--wc-text-soft);
+  counter-increment: step;
+  overflow-wrap: anywhere;
+}
+
+.step::before {
+  content: counter(step);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--wc-r-pill);
+  background: var(--wc-lime-wash);
+  color: var(--wc-lime);
+  font: var(--wc-t-label);
+}
+
+/* --------------------------------------------------------------- mistakes */
+
+.mistakes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-2);
+  min-width: 0;
+}
+
+.mistake {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: var(--wc-s-3);
+  align-items: start;
+  min-width: 0;
+  font: var(--wc-t-body);
+  color: var(--wc-text-soft);
+  overflow-wrap: anywhere;
+}
+
+.mistake::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  /* Centres the dot on the first line of text at the body line height. */
+  margin: calc((1.45em - 6px) / 2) auto;
+  border-radius: var(--wc-r-pill);
+  background: var(--wc-warn);
+}
+
+/* ----------------------------------------------------------------- joints */
+
+.stress {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--wc-s-2);
+  min-width: 0;
+}
+
+.stressRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--wc-s-1) var(--wc-s-2);
+  min-width: 0;
+  padding: 6px 10px;
+  border: 1px solid var(--wc-line-strong);
+  border-radius: var(--wc-r-sm);
+  background: var(--wc-surface-2);
+}
+
+.stressJoint {
+  font: var(--wc-t-small);
+  color: var(--wc-text);
+  overflow-wrap: anywhere;
+}
+
+.stressLoad {
+  font: var(--wc-t-small);
+  color: var(--wc-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.considerations {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-3);
+  min-width: 0;
+  margin: 0;
+}
+
+.consideration {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wc-s-1);
+  min-width: 0;
+  padding-left: var(--wc-s-3);
+  border-left: 2px solid var(--wc-line-strong);
+}
+
+.considerationJoint {
+  font: var(--wc-t-small);
+  color: var(--wc-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.considerationText {
+  margin: 0;
+  font: var(--wc-t-body);
+  color: var(--wc-text-soft);
+  overflow-wrap: anywhere;
+}
+
+/* ------------------------------------------------------------------- note */
+
+.note {
+  width: 100%;
+  /* Three lines of body text, comfortably above the 44 px target minimum. */
+  min-height: 88px;
+  padding: var(--wc-s-3);
+  border: 1px solid var(--wc-line-strong);
+  border-radius: var(--wc-r-md);
+  background: var(--wc-surface-2);
+  color: var(--wc-text);
+  font: var(--wc-t-body);
+  resize: vertical;
+}
+
+.note::placeholder {
+  color: var(--wc-text-faint);
+}
+
+.counter {
+  font: var(--wc-t-small);
+  color: var(--wc-text-muted);
+}

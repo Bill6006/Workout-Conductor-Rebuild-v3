@@ -1,0 +1,169 @@
+/*
+ * A bar, not a modal. No fixed positioning, no scrim, no z-index: it lays out
+ * in the flow wherever the active workout screen puts it, and everything around
+ * it stays tappable while the clock runs.
+ */
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--wc-s-2) var(--wc-s-3);
+  width: 100%;
+  min-width: 0;
+  padding: var(--wc-s-3);
+  border: 1px solid var(--wc-line-strong);
+  border-radius: var(--wc-r-lg);
+  background: var(--wc-surface-2);
+  box-shadow: var(--wc-shadow-card);
+  transition:
+    background-color var(--wc-dur) var(--wc-ease),
+    border-color var(--wc-dur) var(--wc-ease);
+}
+
+.readout {
+  display: flex;
+  align-items: baseline;
+  gap: var(--wc-s-2);
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.eyebrow {
+  flex: none;
+  font: var(--wc-t-label);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--wc-text-muted);
+}
+
+.clock {
+  min-width: 0;
+}
+
+/*
+ * The one number someone reads mid-set, at arm's length, out of breath. Tabular
+ * figures so it does not jitter as the digits change, and `ch`-based min-width so
+ * `0:07` occupies the same box as `12:00` and the buttons beside it never shift.
+ */
+.digits {
+  display: inline-block;
+  min-width: 3.4ch;
+  font: 700 clamp(24px, 8vw, 32px) / 1 var(--wc-font-num);
+  font-variant-numeric: tabular-nums;
+  color: var(--wc-text);
+}
+
+.next {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  /*
+   * Wide enough to say something useful, but happy to take a whole row of its
+   * own at 240 CSS px rather than squeeze the clock.
+   */
+  flex: 1 1 130px;
+  min-width: 0;
+}
+
+.nextLabel {
+  font: var(--wc-t-label);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--wc-text-faint);
+}
+
+.nextText {
+  font: var(--wc-t-small);
+  color: var(--wc-text-soft);
+  /* A long exercise name wraps rather than pushing the bar sideways. */
+  overflow-wrap: anywhere;
+}
+
+/*
+ * Three controls, all large. The plan warns off a cluster of tiny buttons, so
+ * these share a full row and split it evenly: at 240 CSS px that is ~62px each,
+ * which holds `+30s` in Verdana with room to spare, and every one clears 44px
+ * of height by a comfortable margin.
+ */
+.controls {
+  display: flex;
+  gap: var(--wc-s-2);
+  flex: 1 1 100%;
+  min-width: 0;
+}
+
+.control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 52px;
+  padding: 0 var(--wc-s-2);
+  border: 1px solid var(--wc-line-strong);
+  border-radius: var(--wc-r-md);
+  background: var(--wc-surface-3);
+  color: var(--wc-text);
+  font: 700 clamp(14px, 4.4vw, 16px) / 1.1 var(--wc-font);
+  font-variant-numeric: tabular-nums;
+  transition: background-color var(--wc-dur-fast) var(--wc-ease);
+}
+
+.control:hover {
+  background: var(--wc-surface);
+}
+
+.control:active {
+  transform: scale(0.97);
+}
+
+.skip {
+  border-color: var(--wc-lime-edge);
+  background: transparent;
+  color: var(--wc-lime);
+}
+
+.skip:hover {
+  background: var(--wc-lime-wash);
+}
+
+/* ---- Completion: a visible state change, no sound, no dialog. ---- */
+
+.bar[data-state='complete'] {
+  border-color: var(--wc-lime-edge);
+  background: var(--wc-lime-wash);
+}
+
+.bar[data-state='complete'] .eyebrow {
+  color: var(--wc-lime-deep);
+}
+
+.bar[data-state='complete'] .digits {
+  color: var(--wc-lime);
+  animation: restDone var(--wc-dur-slow) var(--wc-ease) 2;
+}
+
+@keyframes restDone {
+  50% {
+    opacity: 0.4;
+  }
+}
+
+/*
+ * The colour swap already says "rest is over"; the flash is the part someone
+ * asked us not to do.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .bar,
+  .control {
+    transition: none;
+  }
+
+  .bar[data-state='complete'] .digits {
+    animation: none;
+  }
+
+  .control:active {
+    transform: none;
+  }
+}
