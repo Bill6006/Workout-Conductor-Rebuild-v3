@@ -2,12 +2,12 @@
 
 **Status: YELLOW — submitted for review.**
 
-|              |                                                          |
-| ------------ | -------------------------------------------------------- |
-| Live app     | https://bill6006.github.io/Workout-Conductor-Rebuild-v3/ |
-| Build marker | _pending deployment_                                     |
-| Commit       | _pending deployment_                                     |
-| Workflow run | _pending deployment_                                     |
+|              |                                                                                                      |
+| ------------ | ---------------------------------------------------------------------------------------------------- |
+| Live app     | https://bill6006.github.io/Workout-Conductor-Rebuild-v3/                                             |
+| Build marker | `phase4-12-7d4bffb`                                                                                  |
+| Commit       | [`7d4bffb`](https://github.com/Bill6006/Workout-Conductor-Rebuild-v3/commit/7d4bffb)                 |
+| Workflow run | [run 33782949683](https://github.com/Bill6006/Workout-Conductor-Rebuild-v3/actions/runs/33782949683) |
 
 ## Scope
 
@@ -106,6 +106,18 @@ about 2 KB.
 
 See [docs/screenshots/phase-4/](../screenshots/phase-4/) — 40 files from the real running
 build.
+
+## Verified on the deployed site
+
+Driven against the live URL on a Pixel-class Android profile: a four-row default session,
+then the length changed to 30 minutes. The summary read
+
+> Rebuilt for 30 min: 2 exercises removed, 1 exercise with fewer sets, a superset removed.
+
+and the session under it was three rows — matching the sentence. No console errors, no page
+errors.
+
+Live capture: [live-android-360-today.png](../screenshots/phase-4/live-android-360-today.png)
 
 ## Defects found and fixed during the phase
 
