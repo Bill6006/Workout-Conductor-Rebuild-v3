@@ -2,12 +2,12 @@
 
 **Status: YELLOW — submitted for review.**
 
-|              |                                                          |
-| ------------ | -------------------------------------------------------- |
-| Live app     | https://bill6006.github.io/Workout-Conductor-Rebuild-v3/ |
-| Build marker | _pending deployment_                                     |
-| Commit       | _pending deployment_                                     |
-| Workflow run | _pending deployment_                                     |
+|              |                                                                                                      |
+| ------------ | ---------------------------------------------------------------------------------------------------- |
+| Live app     | https://bill6006.github.io/Workout-Conductor-Rebuild-v3/                                             |
+| Build marker | `phase3-9-2ad64d9`                                                                                   |
+| Commit       | [`2ad64d9`](https://github.com/Bill6006/Workout-Conductor-Rebuild-v3/commit/2ad64d9)                 |
+| Workflow run | [run 33712659610](https://github.com/Bill6006/Workout-Conductor-Rebuild-v3/actions/runs/33712659610) |
 
 ## Scope
 
@@ -117,6 +117,21 @@ From the default profile at a fully equipped gym, the same day and seed:
   lateral raise as a 4-round superset, Leg extension 4×13–19, Bulgarian split squat 4×8–12.
 - **At home with dumbbells and bands** — the machine work is gone: Pull-up, Dumbbell bench
   press paired with lateral raises, Bulgarian split squat, Reverse lunge.
+
+## Verified on the deployed site
+
+Driven against the live URL after deployment on a Pixel-class Android profile, the engine
+produced these two sessions from the same profile and day:
+
+- **Default** — Pull-up 4×4–8 · Machine chest press + Dumbbell lateral raise, 4-round
+  superset · Leg extension 4×13–19 · Bulgarian split squat 4×8–12
+- **15 min** — Seated machine row 3×10–14 · Pec deck 3×11–14
+
+Those share no exercise. The short session is not the long one with rows removed, which is
+the locked behaviour of the duration control, confirmed in production rather than only in a
+test. No console errors, no page errors.
+
+Live capture: [live-android-360-today.png](../screenshots/phase-3/live-android-360-today.png)
 
 ## Defects found and fixed during the phase
 
