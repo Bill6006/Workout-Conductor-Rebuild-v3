@@ -2,12 +2,12 @@
 
 **Status: YELLOW — submitted for review.**
 
-|              |                                                          |
-| ------------ | -------------------------------------------------------- |
-| Live app     | https://bill6006.github.io/Workout-Conductor-Rebuild-v3/ |
-| Build marker | _pending deployment_                                     |
-| Commit       | _pending deployment_                                     |
-| Workflow run | _pending deployment_                                     |
+|              |                                                                                                      |
+| ------------ | ---------------------------------------------------------------------------------------------------- |
+| Live app     | https://bill6006.github.io/Workout-Conductor-Rebuild-v3/                                             |
+| Build marker | `phase5-14-934d923`                                                                                  |
+| Commit       | [`934d923`](https://github.com/Bill6006/Workout-Conductor-Rebuild-v3/commit/934d923)                 |
+| Workflow run | [run 33790523585](https://github.com/Bill6006/Workout-Conductor-Rebuild-v3/actions/runs/33790523585) |
 
 ## Scope
 
@@ -105,6 +105,17 @@ reason the session persists after every write rather than at the end.
 See [docs/screenshots/phase-5/](../screenshots/phase-5/) — 46 files, now including the
 active workout mid-set. Photographing the empty Workout tab would not have been evidence
 that the logger works, so the capture script starts a session and logs a set.
+
+## Verified on the deployed site
+
+Driven against the live URL on a Pixel-class Android profile: setup skipped, session started,
+two sets logged, then a full page reload. **Both sets were still there.** No console errors,
+no page errors.
+
+That is the assertion this phase exists for — a session that survives the app being closed
+mid-workout, in production rather than only in a test.
+
+Live capture: [live-android-360-workout.png](../screenshots/phase-5/live-android-360-workout.png)
 
 ## Defects found and fixed during the phase
 
