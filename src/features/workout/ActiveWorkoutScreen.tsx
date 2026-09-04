@@ -39,11 +39,16 @@ const SessionSummary = lazy(() =>
 )
 // The sheets are reached by a deliberate tap, so they load then rather than
 // riding along with the screen.
+// The MODULE, not the barrel. A dynamic import of `Foo/index.ts` names the chunk
+// `index-*`, which collides with the entry chunk's own name and makes the
+// boot-chunk guard unable to tell which one it is looking at.
 const ExerciseDetail = lazy(() =>
-  import('../../components/ExerciseDetail').then((module) => ({ default: module.ExerciseDetail })),
+  import('../../components/ExerciseDetail/ExerciseDetail').then((module) => ({
+    default: module.ExerciseDetail,
+  })),
 )
 const AlternativesSheet = lazy(() =>
-  import('../../components/AlternativesSheet').then((module) => ({
+  import('../../components/AlternativesSheet/AlternativesSheet').then((module) => ({
     default: module.AlternativesSheet,
   })),
 )

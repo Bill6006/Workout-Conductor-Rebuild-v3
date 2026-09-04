@@ -166,11 +166,16 @@ describe('TodayScreen', () => {
       expect(screen.getAllByText('—')).toHaveLength(3)
     })
 
-    it('explains itself calmly when storage cannot be read', async () => {
+    it('does not dead-end when the saved profile cannot be read', async () => {
       renderToday(unavailableRepository())
 
-      await waitFor(() => expect(screen.getByText(/could not be read on this device/i)).toBeInTheDocument())
-      expect(screen.getAllByText('—')).toHaveLength(3)
+      // The store deliberately refuses to write a fresh profile over one it could
+      // not read. That is right, but a refusal with no way forward strands the
+      // person — so the card must offer a retry and an explicit way to start over.
+      expect(await screen.findByRole('heading', { level: 2, name: /could not be read/i })).toBeInTheDocument()
+      expect(screen.getByText(/Nothing has been deleted/i)).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /try again/i })).toBeEnabled()
+      expect(screen.getByRole('link', { name: /set up a new profile/i })).toBeInTheDocument()
     })
   })
 

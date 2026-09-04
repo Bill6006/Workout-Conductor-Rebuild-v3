@@ -5,8 +5,8 @@ import { ScreenHeader } from '../../components/ScreenHeader'
 import { SectionHeading } from '../../components/SectionHeading'
 import { StatTile } from '../../components/StatTile'
 import { Suspense, lazy, useCallback, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useActiveSession } from '../workout/useActiveSession'
+import { Link, useNavigate } from 'react-router-dom'
+import { ONBOARDING_PATH } from '../../app/setupGate'
 import { CalibrationOverlay } from '../../components/CalibrationOverlay'
 import { useProfile } from '../../core/state'
 import { nowIso } from '../../core/time/clock'
@@ -56,11 +56,22 @@ function Fact({ label, value }: FactProps) {
   )
 }
 
-function StartAction() {
+/**
+ * Start Workout while there is no session to start.
+ *
+ * The button works — it is disabled here because the session it would start does
+ * not exist yet, and the caption says which of those it is rather than repeating
+ * a phase number that has since shipped.
+ */
+function StartAction({ status }: { status: Exclude<WorkoutStatus, 'ready'> }) {
   return (
     <>
       <PrimaryAction disabled>Start Workout</PrimaryAction>
-      <p className={styles.caption}>Logging a session arrives in Phase 5, so this cannot start one yet.</p>
+      <p className={styles.caption}>
+        {status === 'loading'
+          ? 'Ready as soon as your session finishes building.'
+          : 'There is no session to start right now.'}
+      </p>
     </>
   )
 }
@@ -104,32 +115,76 @@ function SessionCard({ profile, trainingToday, status, message, choice, onChoose
       <p className={styles.caption}>
         Choosing a length rebuilds the session for that time — it does not cut the end off a longer one.
       </p>
-      <StartAction />
+      <StartAction status={status} />
     </Card>
   )
 }
 
-function EmptySessionCard({ unavailable }: { unavailable: boolean }) {
+/**
+ * No profile — either because setup has not happened, or because the saved one
+ * could not be read.
+ *
+ * THE SECOND CASE MUST NOT DEAD-END. The profile store deliberately refuses to
+ * write a fresh profile over one it could not read, which is the right call —
+ * overwriting is how somebody loses months of history to a transient storage
+ * error. But a refusal with no way forward strands the person, which is what
+ * this card used to do: a generic sentence, two disabled controls, and nothing
+ * to press.
+ *
+ * So it now says WHY, offers a retry, and — only after making the consequence
+ * explicit — offers to start over.
+ */
+function EmptySessionCard({
+  unavailable,
+  onRetry,
+  retrying,
+}: {
+  unavailable: boolean
+  onRetry: () => void
+  retrying: boolean
+}) {
+  if (!unavailable) {
+    return (
+      <Card tone="accent" eyebrow="Today" title="No profile yet">
+        <p className={styles.copy}>
+          Once your profile is set up, this card holds the session for today and the one control that shapes
+          it.
+        </p>
+        <DurationControl value="default" onChange={() => {}} defaultMinutes={null} disabled />
+      </Card>
+    )
+  }
+
   return (
-    <Card tone="accent" eyebrow="Today" title="No profile yet">
+    <Card tone="accent" eyebrow="Today" title="Your profile could not be read">
+      {/*
+        The app-level storage notice already carries the technical reason. Saying
+        it twice on one screen reads as two problems, so this card does the other
+        half of the job: what it means for you, and what to do about it.
+      */}
       <p className={styles.copy}>
-        {unavailable
-          ? 'Your saved profile could not be read on this device, so there is nothing to show here yet.'
-          : 'Once your profile is set up, this card holds the session for today and the one control that shapes it.'}
+        Nothing has been deleted. The most common cause is another copy of this app still open in another tab
+        or window — close those and try again.
       </p>
 
-      <DurationControl value="default" onChange={() => {}} defaultMinutes={null} disabled />
-      <StartAction />
+      <PrimaryAction onClick={onRetry} disabled={retrying}>
+        {retrying ? 'Trying again…' : 'Try again'}
+      </PrimaryAction>
+
+      <p className={styles.caption}>
+        Still stuck? <Link to={ONBOARDING_PATH}>Set up a new profile</Link> — this creates a fresh one and
+        leaves the unreadable data where it is.
+      </p>
     </Card>
   )
 }
 
 export function TodayScreen() {
   const navigate = useNavigate()
-  const { profile, status } = useProfile()
+  const { profile, status, reload } = useProfile()
   const session = useGeneratedWorkout(profile)
-  const active = useActiveSession()
   const [starting, setStarting] = useState(false)
+  const [retrying, setRetrying] = useState(false)
 
   /**
    * Starting a session hands the generated workout to the active-session store,
@@ -138,13 +193,19 @@ export function TodayScreen() {
    * backed by nothing.
    */
   const startSession = useCallback(() => {
-    if (!session.workout) return
+    const workout = session.workout
+    if (!workout) return
     setStarting(true)
-    void active
-      .start(session.workout)
-      .then(() => navigate('/workout'))
+    // Imported here rather than at the top: the session store pulls in the
+    // workout schema, and Today is the landing route. A button nobody has
+    // pressed yet should not cost first paint.
+    void import('../workout/startSession')
+      .then(({ startSession: begin }) => begin(workout))
+      .then((started) => {
+        if (started) navigate('/workout')
+      })
       .finally(() => setStarting(false))
-  }, [active, navigate, session.workout])
+  }, [navigate, session.workout])
 
   const today = new Date(nowIso())
   const trainingToday = profile ? profile.schedule.availableDays.includes(weekdayKey(today)) : false
@@ -174,7 +235,14 @@ export function TodayScreen() {
       />
 
       {!profile ? (
-        <EmptySessionCard unavailable={status === 'error'} />
+        <EmptySessionCard
+          unavailable={status === 'error'}
+          onRetry={() => {
+            setRetrying(true)
+            void reload().finally(() => setRetrying(false))
+          }}
+          retrying={retrying}
+        />
       ) : session.status === 'ready' && session.workout ? (
         /*
          * The waiting card IS the suspense fallback, not `null`. The one

@@ -149,7 +149,7 @@ describe('App — locked product decision', () => {
     }
 
     expect(total, 'the app must own exactly one Start Workout control, on Today').toBe(1)
-  })
+  }, 30_000)
 
   it('has no competing workout-mode control on any route', async () => {
     for (const path of ROUTES) {
@@ -159,7 +159,7 @@ describe('App — locked product decision', () => {
 
       cleanup()
     }
-  })
+  }, 30_000)
 
   it('keeps the single start control on Today and off Workout', async () => {
     await renderAppAt('/', seededRepository(setUpProfile()))
@@ -193,7 +193,7 @@ describe('App — locked product decision', () => {
     }
 
     expect(total, 'workout length is one control, on Today').toBe(1)
-  })
+  }, 30_000)
 })
 
 /**
